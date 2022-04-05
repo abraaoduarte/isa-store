@@ -10,12 +10,16 @@
     "lint:code": "eslint 'src/**/*.{js,ts}' --max-warnings 0",
     "lint:prettier": "yarn prettier 'src/**/*.{js,ts,json,md,yml}'",
     "lint:all": "yarn lint:code && yarn lint:prettier -c",
-    "start:dev": "nodemon"
+    "start:dev": "nodemon",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
   },
   "dependencies": {
     "koa": "^2.13.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^16.2.3",
+    "@commitlint/config-conventional": "^16.2.1",
     "@types/koa": "^2.13.4",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
@@ -24,6 +28,8 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.7",
     "nodemon": "^2.0.15",
     "prettier": "^2.6.2",
     "ts-node": "^10.7.0",
