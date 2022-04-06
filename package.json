@@ -16,7 +16,10 @@
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
-    "koa": "^2.13.4"
+    "knex": "^1.0.5",
+    "koa": "^2.13.4",
+    "objection": "^3.0.1",
+    "pg": "^8.7.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.3",

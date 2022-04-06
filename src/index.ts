@@ -1,10 +1,12 @@
-import listen from 'infra/listen'
-import server from 'infra/server'
+import listen from 'infra/listen';
+import server from 'infra/server';
+import { connection } from 'infra/database/connection';
 
 listen(server)
   .then(async () => {
-    console.log('here')
+    await connection();
+    console.log('success');
   })
   .catch((error) => {
-    console.error('error', error)
-  })
+    console.error('error', error);
+  });
