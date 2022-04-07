@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 
 const router = new Router({
-  prefix: '/auth',
+  prefix: '/auth'
 });
 
 router.get('/', async (ctx, next) => {
