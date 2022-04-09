@@ -14,11 +14,13 @@
     "prepare": "husky install",
     "pre-commit": "lint-staged",
     "migration:create": "knex migrate:make --cwd src/infra/database -x ts --esm",
-    "migration:run": "knex --cwd src/infra/database migrate:latest",
-    "migration:rollback": "knex migrate:rollback --cwd src/infra/database"
+    "migration:run": "node -r dotenv-safe/config ./node_modules/.bin/knex --cwd src/infra/database migrate:latest",
+    "migration:rollback": "node -r dotenv-safe/config ./node_modules/.bin/knex migrate:rollback --cwd src/infra/database"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
+    "dotenv": "^16.0.0",
+    "dotenv-safe": "^8.2.0",
     "knex": "^1.0.5",
     "koa": "^2.13.4",
     "koa-helmet": "^6.1.0",
