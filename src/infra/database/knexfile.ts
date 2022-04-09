@@ -1,6 +1,6 @@
 import path from 'path';
 
-export const settings = {
+const knexfile = {
   development: {
     client: 'pg',
     connection: {
@@ -19,3 +19,5 @@ export const settings = {
     },
   },
 };
+
+export default knexfile;

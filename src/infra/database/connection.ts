@@ -1,9 +1,9 @@
 import { Model } from 'objection';
 import Knex from 'knex';
-import { settings } from 'infra/database/settings';
+import knexfile from 'infra/database/knexfile';
 
 export const connection = async () => {
-  const knex = Knex(settings.development);
+  const knex = Knex(knexfile.development);
   knex.migrate.latest();
   Model.knex(knex);
 };

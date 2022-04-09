@@ -12,7 +12,10 @@
     "lint:all": "yarn lint:code && yarn lint:prettier -c",
     "start:dev": "nodemon",
     "prepare": "husky install",
-    "pre-commit": "lint-staged"
+    "pre-commit": "lint-staged",
+    "migration:create": "knex migrate:make --cwd src/infra/database -x ts --esm",
+    "migration:run": "knex --cwd src/infra/database migrate:latest",
+    "migration:rollback": "knex migrate:rollback --cwd src/infra/database"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
@@ -32,6 +35,7 @@
     "@types/koa__router": "^8.0.11",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
     "@typescript-eslint/parser": "^5.18.0",
+    "@vscode/sqlite3": "^5.0.8",
     "eslint": "^7.12.1",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.22.1",
