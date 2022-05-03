@@ -1,7 +1,7 @@
 require('dotenv-safe').config({
   allowEmptyValues: true,
   path: '.env',
-  sample: '.env.example',
+  sample: '.env.example'
 });
 
 const env = (key: string, defaultValue?: string): string => {
