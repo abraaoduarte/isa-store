@@ -8,6 +8,7 @@ listen(server)
     await connection();
     logger.info('DATABASE CONNECTED');
     logger.info(`PORT: ${env('PORT', '3001')}`);
+    logger.info(`URL: http://localhost:${env('PORT', '3001')}`);
     logger.info('SERVER STARTED');
   })
   .catch((error) => {
