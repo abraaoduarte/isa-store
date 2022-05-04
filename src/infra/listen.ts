@@ -2,9 +2,9 @@ import * as http from 'http';
 import type Koa from 'koa';
 import env from 'utils/env';
 
-function listen(
+function listen (
   handler: Koa,
-  { port = env('PORT', '3001') } = {},
+  { port = env('PORT', '3001') } = {}
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     http
