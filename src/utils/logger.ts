@@ -7,7 +7,7 @@ const {
   printf,
   errors,
   colorize,
-  json,
+  json
 } = winston.format;
 
 const levels = {
@@ -15,7 +15,7 @@ const levels = {
   warn: 1,
   info: 2,
   http: 3,
-  debug: 4,
+  debug: 4
 };
 
 const setLevel = () => {
@@ -29,14 +29,14 @@ const logColors = {
   warn: 'yellow',
   info: 'green',
   http: 'magenta',
-  debug: 'cyan',
+  debug: 'cyan'
 };
 
 addColors(logColors);
 
 const logFormat = printf(
   ({ level, message, timestamp, stack }) =>
-    `${timestamp} ${level}: ${stack || message}`,
+    `${timestamp} ${level}: ${stack || message}`
 );
 
 const format = combine(
@@ -44,14 +44,14 @@ const format = combine(
   json(),
   datetime({ format: 'YYYY-MM-DD HH:mm:ss' }),
   errors({ stack: true }),
-  logFormat,
+  logFormat
 );
 
 const Logger = createLogger({
   level: setLevel(),
   levels,
   format,
-  transports: [new transports.Console()],
+  transports: [new transports.Console()]
 });
 
 export default Logger;
