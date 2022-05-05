@@ -7,3 +7,13 @@ export interface ResponseRequestProp {
     // Response result to the user
     body: object;
   }
+
+export interface PayloadLoginProps {
+    // User id
+    data: {
+      user: string;
+    };
+    iat: number;
+    // Expiration date
+    exp: number;
+  }

@@ -10,9 +10,11 @@ export const findByEmail = async (email: string): Promise<User | undefined> => U
 export const findUserByUuid = (uuid: string) => User.query().findById(uuid);
 
 export const register = async ({ body }: Request) => transaction(User.knex(), async (trx) => {
-  const findUser = await findByEmail(toLower(body.email));
+  const userByEmail = await findByEmail(toLower(body.email));
 
-  if (!isEmpty(findUser) || isNil(findUser)) {
+  const emailBeingUsed = !isNil(userByEmail) && !isEmpty(userByEmail);
+
+  if (emailBeingUsed) {
     throw new BadRequest('This email is already being used!');
   }
 
