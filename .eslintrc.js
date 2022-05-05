@@ -15,5 +15,12 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
+        "semi": ["error", "always"],
+        "camelcase": [
+            0,
+            {
+                "properties": "never"
+            }
+        ]
     }
 }

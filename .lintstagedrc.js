@@ -8,7 +8,7 @@ module.exports = {
     const match = files.filter((file) => !cli.isPathIgnored(file)).join(' ');
     return [
       `eslint --max-warnings=0 ${match}`,
-      `prettier --write ${match}`,
+      `prettier ${match}`,
     ];
   },
   './**/*.{json,md,yml}': ['prettier --write'],
