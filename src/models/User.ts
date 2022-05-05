@@ -1,6 +1,12 @@
 import Model from './Model';
 
 class User extends Model {
+  public id: string;
+  public email: string;
+  public name: string;
+  public password: string;
+  public is_active: boolean;
+
   static tableName = 'users';
   static useSoftDelete = true;
 

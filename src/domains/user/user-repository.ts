@@ -5,7 +5,9 @@ import { transaction } from 'objection';
 import { isEmpty, isNil, omit, toLower } from 'ramda';
 import bcrypt from 'bcrypt';
 
-const findByEmail = (email: string) => User.query().where({ email: email });
+export const findByEmail = async (email: string): Promise<User | undefined> => User.query().first().where({ email: email });
+
+export const findUserByUuid = (uuid: string) => User.query().findById(uuid);
 
 export const register = async ({ body }: Request) => transaction(User.knex(), async (trx) => {
   const findUser = await findByEmail(toLower(body.email));

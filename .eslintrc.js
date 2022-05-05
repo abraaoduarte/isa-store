@@ -16,5 +16,11 @@ module.exports = {
     ],
     "rules": {
         "semi": ["error", "always"],
+        "camelcase": [
+            0,
+            {
+                "properties": "never"
+            }
+        ]
     }
 }
