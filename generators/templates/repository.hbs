@@ -1,0 +1,25 @@
+import { Request } from 'koa';
+import {{pascalCase name}} from 'models/{{pascalCase name}}';
+import { transaction } from 'objection';
+
+export const index = async ({ body }: Request) => {
+  return body;
+};
+
+export const show = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
+  return body;
+});
+
+export const create = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
+  return body;
+});
+
+export const update = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
+  return body;
+});
+
+export const destroy = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
+  return body;
+});
+
+

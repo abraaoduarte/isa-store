@@ -15,7 +15,8 @@
     "pre-commit": "lint-staged",
     "migration:create": "knex migrate:make --cwd src/infra/database -x ts --esm",
     "migration:run": "node -r dotenv-safe/config ./node_modules/.bin/knex --cwd src/infra/database migrate:latest",
-    "migration:rollback": "node -r dotenv-safe/config ./node_modules/.bin/knex migrate:rollback --cwd src/infra/database"
+    "migration:rollback": "node -r dotenv-safe/config ./node_modules/.bin/knex migrate:rollback --cwd src/infra/database",
+    "generate": "yarn plop --plopfile generators/plopfile.js"
   },
   "dependencies": {
     "@koa/router": "^10.1.1",
@@ -60,6 +61,7 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.3.7",
     "nodemon": "^2.0.15",
+    "plop": "^3.1.0",
     "prettier": "^2.6.2",
     "ts-node": "^10.7.0",
     "tsconfig-paths": "^3.14.1",
