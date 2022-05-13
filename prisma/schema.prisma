@@ -19,3 +19,14 @@ model User {
   deleted_at DateTime?
   @@map("users")
 }
+
+model Brand {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  description String?
+  image String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("brands")
+}
