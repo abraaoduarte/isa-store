@@ -11,11 +11,6 @@ module.exports = (plop) => {
     actions: [
       {
         type: 'add',
-        path: '../src/models/{{pascalCase name}}.ts',
-        templateFile: 'templates/model.hbs'
-      },
-      {
-        type: 'add',
         path: '../src/domains/{{lowerCase name}}/{{dashCase name}}-repository.ts',
         templateFile: 'templates/repository.hbs'
       },

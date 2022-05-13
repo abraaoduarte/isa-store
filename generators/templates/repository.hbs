@@ -1,25 +1,93 @@
+import { isEmpty, isNil } from 'ramda';
+import { ParsedQs } from 'qs';
+import { {{pascalCase name}} } from '@prisma/client';
+import { RepositoryList } from 'interfaces';
+import pagination from 'utils/pagination';
+import prisma from 'prisma/prisma';
 import { Request } from 'koa';
-import {{pascalCase name}} from 'models/{{pascalCase name}}';
-import { transaction } from 'objection';
 
-export const index = async ({ body }: Request) => {
-  return body;
+export const index = async (query: ParsedQs): Promise<RepositoryList<{{pascalCase name}}[]>> => {
+  const { page, limit, currentPage } = pagination(query);
+
+  const total = await prisma.{{lowerCase name}}.count();
+  const results = await prisma.{{lowerCase name}}.findMany({
+    skip: page * limit,
+    take: limit
+  });
+
+  return {
+    result: results,
+    total,
+    pages: Math.ceil(total / limit),
+    currentPage
+  };
 };
 
-export const show = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
-  return body;
-});
+export const show = async (uuid: string): Promise<{{pascalCase name}}> => {
+  const {{lowerCase name}} = await prisma.{{lowerCase name}}.findUnique({
+    where: {
+      id: uuid
+    }
+  });
 
-export const create = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
-  return body;
-});
+  if (isNil({{lowerCase name}}) || isEmpty({{lowerCase name}})) {
+    throw new Error('{{pascalCase name}} not found');
+  }
 
-export const update = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
-  return body;
-});
+  return {{lowerCase name}};
+};
 
-export const destroy = async ({ body }: Request) => transaction({{pascalCase name}}.knex(), async (trx) => {
-  return body;
-});
+export const create = async ({ body }: Request): Promise<{{pascalCase name}}> => {
+  const result = await prisma.$transaction(async (prisma) => {
+    const data = body as {{pascalCase name}};
 
+    const {{lowerCase name}} = prisma.{{lowerCase name}}.create({
+      data: {
+        ...data
+      }
+    });
 
+    return {{lowerCase name}};
+  });
+
+  return result;
+};
+
+export const update = async ({ body }: Request, uuid: string): Promise<{{pascalCase name}}> => {
+  const result = await prisma.$transaction(async (prisma) => {
+    const {{lowerCase name}} = prisma.{{lowerCase name}}.update({
+      data: {
+        name: body.name,
+        description: body.description,
+        image: body.image
+      },
+      where: {
+        id: uuid
+      }
+    });
+
+    return {{lowerCase name}};
+  });
+
+  return result;
+};
+
+export const destroy = async (uuid: string): Promise<{{pascalCase name}}> => {
+  const {{lowerCase name}} = await prisma.{{lowerCase name}}.findUnique({
+    where: {
+      id: uuid
+    }
+  });
+
+  if (isNil({{lowerCase name}}) || isEmpty({{lowerCase name}})) {
+    throw new Error('{{pascalCase name}} not found');
+  }
+
+  await prisma.{{lowerCase name}}.delete({
+    where: {
+      id: uuid
+    }
+  });
+
+  return {{lowerCase name}};
+};

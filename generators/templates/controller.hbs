@@ -3,16 +3,16 @@ import * as {{lowerCase name}}Repository from 'domains/{{lowerCase name}}/{{lowe
 import { wrap } from 'utils/wrap';
 
 export const index = wrap((req: Context) =>
-  {{lowerCase name}}Repository.index(req.request).then(({{lowerCase name}}) => ({
+  {{lowerCase name}}Repository.index(req.query).then(({{lowerCase name}}s) => ({
     body: {
       message: 'success',
-      result: {{lowerCase name}}
+      ...{{lowerCase name}}s
     }
   }))
 );
 
 export const show = wrap((req: Context) =>
-  {{lowerCase name}}Repository.show(req.request).then(({{lowerCase name}}) => ({
+  {{lowerCase name}}Repository.show(req.params.uuid).then(({{lowerCase name}}) => ({
     body: {
       message: 'success',
       result: {{lowerCase name}}
@@ -30,7 +30,7 @@ export const create = wrap((req: Context) =>
 );
 
 export const update = wrap((req: Context) =>
-  {{lowerCase name}}Repository.update(req.request).then(({{lowerCase name}}) => ({
+  {{lowerCase name}}Repository.update(req.request, req.params.uuid).then(({{lowerCase name}}) => ({
     body: {
       message: 'success',
       result: {{lowerCase name}}
@@ -39,7 +39,7 @@ export const update = wrap((req: Context) =>
 );
 
 export const destroy = wrap((req: Context) =>
-  {{lowerCase name}}Repository.destroy(req.request).then(({{lowerCase name}}) => ({
+  {{lowerCase name}}Repository.destroy(req.params.uuid).then(({{lowerCase name}}) => ({
     body: {
       message: 'success',
       result: {{lowerCase name}}
