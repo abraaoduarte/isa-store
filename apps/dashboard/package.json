@@ -9,12 +9,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:code": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint:styles": "stylelint 'src/**/*.{ts,tsx,less}'",
+    "lint:prettier": "yarn prettier 'src/**/*.{js,jsx,ts,tsx,less,json,md,yml}'",
+    "lint:all": "yarn lint:code --max-warnings 0 && yarn lint:styles && yarn lint:prettier -c",
+    "compile": "tsc --noEmit",
+    "compile:all": "yarn compile --project tsconfig.json",
+    "prettify": "prettier --write 'src/**/*.{js,jsx,ts,tsx,less,json,md,yml}'"
   },
   "dependencies": {
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@material-ui/core": "^4.12.4",
+    "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.1",
     "next": "12.1.6",
     "react": "18.1.0",
@@ -27,8 +35,13 @@
     "@types/react": "18.0.9",
     "@types/react-dom": "18.0.5",
     "@types/styled-components": "^5.1.25",
+    "@typescript-eslint/eslint-plugin": "^5.26.0",
+    "@typescript-eslint/parser": "^5.26.0",
     "eslint": "8.16.0",
     "eslint-config-next": "12.1.6",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.6.2",
     "typescript": "4.6.4"
   }
 }
