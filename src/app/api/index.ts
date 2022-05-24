@@ -1,6 +1,11 @@
 import Router from '@koa/router';
 import authRouter from './auth/auth-router';
 import userRouter from './user/user-router';
+import brandRouter from './brand/brand-router';
+import sizeRouter from './size/size-router';
+import colorRouter from './color/color-router';
+import productCategoryRouter from './product-category/product-category-router';
+import productRouter from './product/product-router';
 
 const router = new Router({
   prefix: '/api'
@@ -8,5 +13,10 @@ const router = new Router({
 
 router.use(authRouter.routes());
 router.use(userRouter.routes());
+router.use(brandRouter.routes());
+router.use(sizeRouter.routes());
+router.use(colorRouter.routes());
+router.use(productCategoryRouter.routes());
+router.use(productRouter.routes());
 
 export default router;

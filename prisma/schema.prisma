@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email String  @unique
+  name String
+  password String
+  is_active Boolean? @default(false)
+  product Product?
+  productVariation ProductVariation?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("users")
+}
+
+model Brand {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  description String?
+  image String?
+  product Product?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("brands")
+}
+
+model Size {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  productVariation ProductVariation?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("sizes")
+}
+
+model Color {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  productVariation ProductVariation?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("colors")
+}
+
+model ProductCategory {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  description String
+  product Product?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("product_categories")
+}
+
+model Product {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  description String
+  banner String
+  price Int
+  discount Decimal
+  quantity Int
+  is_active Boolean
+  user User @relation(fields: [user_id], references: [id])
+  user_id String @db.Uuid
+  brand Brand @relation(fields: [brand_id], references: [id])
+  brand_id String @db.Uuid
+  productCategory ProductCategory @relation(fields: [product_category_id], references: [id])
+  product_category_id String @db.Uuid
+  productVariation ProductVariation?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("products")
+}
+
+model ProductVariation {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  quantity Int
+  is_active Boolean
+  user User @relation(fields: [user_id], references: [id])
+  user_id String @db.Uuid
+  product Product @relation(fields: [product_id], references: [id])
+  product_id String @db.Uuid
+  size Size @relation(fields: [size_id], references: [id])
+  size_id String @db.Uuid
+  color Color @relation(fields: [color_id], references: [id])
+  color_id String @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  productImage ProductImage?
+  @@map("product_variations")
+}
+
+model ProductImage {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  url String
+  is_active Boolean
+  productVariation ProductVariation @relation(fields: [product_variation_id], references: [id])
+  product_variation_id String @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("product_images")
+}

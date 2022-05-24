@@ -1,0 +1,48 @@
+import { Context } from 'koa';
+import * as {{lowerCase name}}Repository from 'domains/{{lowerCase name}}/{{lowerCase name}}-repository';
+import { wrap } from 'utils/wrap';
+
+export const index = wrap((req: Context) =>
+  {{lowerCase name}}Repository.index(req.query).then(({{lowerCase name}}s) => ({
+    body: {
+      message: 'success',
+      ...{{lowerCase name}}s
+    }
+  }))
+);
+
+export const show = wrap((req: Context) =>
+  {{lowerCase name}}Repository.show(req.params.uuid).then(({{lowerCase name}}) => ({
+    body: {
+      message: 'success',
+      result: {{lowerCase name}}
+    }
+  }))
+);
+
+export const create = wrap((req: Context) =>
+  {{lowerCase name}}Repository.create(req.request).then(({{lowerCase name}}) => ({
+    body: {
+      message: 'success',
+      result: {{lowerCase name}}
+    }
+  }))
+);
+
+export const update = wrap((req: Context) =>
+  {{lowerCase name}}Repository.update(req.request, req.params.uuid).then(({{lowerCase name}}) => ({
+    body: {
+      message: 'success',
+      result: {{lowerCase name}}
+    }
+  }))
+);
+
+export const destroy = wrap((req: Context) =>
+  {{lowerCase name}}Repository.destroy(req.params.uuid).then(({{lowerCase name}}) => ({
+    body: {
+      message: 'success',
+      result: {{lowerCase name}}
+    }
+  }))
+);
