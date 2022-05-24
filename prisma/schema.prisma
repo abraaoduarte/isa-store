@@ -14,6 +14,7 @@ model User {
   name String
   password String
   is_active Boolean? @default(false)
+  product Product?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -25,6 +26,7 @@ model Brand {
   name String
   description String?
   image String?
+  product Product?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -53,8 +55,30 @@ model ProductCategory {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
   description String
+  product Product?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
   @@map("product_categories")
+}
+
+model Product {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  description String
+  banner String
+  price Int
+  discount Decimal
+  quantity Int
+  is_active Boolean
+  user User @relation(fields: [user_id], references: [id])
+  user_id String @db.Uuid
+  brand Brand @relation(fields: [brand_id], references: [id])
+  brand_id String @db.Uuid
+  productCategory ProductCategory @relation(fields: [product_category_id], references: [id])
+  product_category_id String @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("products")
 }

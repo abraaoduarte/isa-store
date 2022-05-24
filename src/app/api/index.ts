@@ -5,6 +5,7 @@ import brandRouter from './brand/brand-router';
 import sizeRouter from './size/size-router';
 import colorRouter from './color/color-router';
 import productCategoryRouter from './product-category/product-category-router';
+import productRouter from './product/product-router';
 
 const router = new Router({
   prefix: '/api'
@@ -16,5 +17,6 @@ router.use(brandRouter.routes());
 router.use(sizeRouter.routes());
 router.use(colorRouter.routes());
 router.use(productCategoryRouter.routes());
+router.use(productRouter.routes());
 
 export default router;
