@@ -15,6 +15,7 @@ model User {
   password String
   is_active Boolean? @default(false)
   product Product?
+  productVariation ProductVariation?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -36,6 +37,7 @@ model Brand {
 model Size {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
+  productVariation ProductVariation?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -45,6 +47,7 @@ model Size {
 model Color {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
+  productVariation ProductVariation?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -77,8 +80,27 @@ model Product {
   brand_id String @db.Uuid
   productCategory ProductCategory @relation(fields: [product_category_id], references: [id])
   product_category_id String @db.Uuid
+  productVariation ProductVariation?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
   @@map("products")
+}
+
+model ProductVariation {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  quantity Int
+  is_active Boolean
+  user User @relation(fields: [user_id], references: [id])
+  user_id String @db.Uuid
+  product Product @relation(fields: [product_id], references: [id])
+  product_id String @db.Uuid
+  size Size @relation(fields: [size_id], references: [id])
+  size_id String @db.Uuid
+  color Color @relation(fields: [color_id], references: [id])
+  color_id String @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("product_variations")
 }
