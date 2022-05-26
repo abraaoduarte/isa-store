@@ -45,7 +45,6 @@ type ThemeProviderProps = {
 };
 
 export const ThemeProvider: FC<ThemeProviderProps> = ({ children }) => {
-  console.log(theme);
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />
