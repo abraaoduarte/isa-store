@@ -7,7 +7,7 @@ interface CustomDrawerProps extends DrawerProps {
 }
 
 export const CustomDrawer = styled(Drawer, {
-  shouldForwardProp: (prop) => prop !== 'open',
+  shouldForwardProp: (prop) => prop !== 'isOpen',
 })<CustomDrawerProps>(({ theme, width, isOpen }) => ({
   '& .MuiDrawer-paper': {
     position: 'relative',

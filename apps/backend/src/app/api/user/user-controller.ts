@@ -10,3 +10,10 @@ export const register = wrap((req: Context) =>
     }
   }))
 );
+
+export const retrieve = wrap((req: Context) => userRepository.retrieve(req.state.user.id).then((user) => ({
+  body: {
+    message: 'success',
+    result: user
+  }
+})));
