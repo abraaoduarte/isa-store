@@ -2,7 +2,7 @@ import { Request } from 'koa';
 import { isEmpty, isNil, omit, toLower } from 'ramda';
 import { PrismaClient, User } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { BadRequest } from 'app/error';
+import { BadRequest, Unauthorized } from 'app/error';
 
 const prisma = new PrismaClient();
 
@@ -43,4 +43,16 @@ export const register = async ({ body }: Request) => {
   });
 
   return result;
+};
+
+export const retrieve = async (uuid: string) => {
+  const user = await findUserByUuid(uuid);
+
+  if (isNil(user) || isEmpty(user)) {
+    throw new Unauthorized(
+      'Não é possível atualizar token pois o usuário já não existe mais.'
+    );
+  }
+
+  return omit(['password'], user);
 };

@@ -9,5 +9,6 @@ const router = new Router({
   .use(locker.api());
 
 router.post('/register', validate.body(CreateUserSchema), controller.register);
+router.get('/retrieve', controller.retrieve);
 
 export default router;
