@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useContext } from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -15,6 +15,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import yup from 'utils/yup';
 import { Controller, useForm } from 'react-hook-form';
 import { Footer } from './Login.styles';
+import { AuthContext } from 'contexts/AuthContext';
+import { useSnackbar } from 'notistack';
 
 const schema = yup
   .object({
@@ -32,8 +34,17 @@ const Login = () => {
   const { control, handleSubmit } = useForm<LoginDataProps>({
     resolver: yupResolver(schema),
   });
+  const { enqueueSnackbar } = useSnackbar();
 
-  const onSubmit = (data: LoginDataProps) => console.log(data);
+  const { signIn } = useContext(AuthContext);
+
+  const onSubmit = (data: LoginDataProps) => {
+    signIn(data).catch(() =>
+      enqueueSnackbar('Usuário ou senha inválidos', {
+        variant: 'error',
+      }),
+    );
+  };
 
   return (
     <Container component="main" maxWidth="xs">
