@@ -6,7 +6,7 @@ import Document, {
   DocumentContext,
 } from 'next/document';
 import { ServerStyleSheet } from 'styled-components';
-import { ServerStyleSheets } from '@material-ui/core';
+import { ServerStyleSheets } from '@mui/styles';
 import { Fragment } from 'react';
 
 export default class MyDocument extends Document {
