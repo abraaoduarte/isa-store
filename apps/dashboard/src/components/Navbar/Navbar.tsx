@@ -1,3 +1,4 @@
+import { FC, useState, useContext } from 'react';
 import {
   Avatar,
   Divider,
@@ -9,15 +10,16 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { FC, useState } from 'react';
 import MenuIcon from '@mui/icons-material/Menu';
 import IconButton from '@mui/material/IconButton';
-
+import { AuthContext } from 'contexts/AuthContext';
 import { NavbarProps } from './Navbar.interface';
 import { CustomAppBar } from './Navbar.styles';
 import { Logout, PersonAdd, Settings } from '@mui/icons-material';
 
 const Navbar: FC<NavbarProps> = ({ isOpen = true, width, handleMenu }) => {
+  const { user } = useContext(AuthContext);
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -38,7 +40,6 @@ const Navbar: FC<NavbarProps> = ({ isOpen = true, width, handleMenu }) => {
           onClick={handleMenu}
           sx={{
             marginRight: '36px',
-            ...(isOpen && { display: 'none' }),
           }}
         >
           <MenuIcon />
@@ -66,7 +67,9 @@ const Navbar: FC<NavbarProps> = ({ isOpen = true, width, handleMenu }) => {
               aria-haspopup="true"
               aria-expanded={openMenu ? 'true' : undefined}
             >
-              <Avatar sx={{ width: 32, height: 32 }}>AD</Avatar>
+              <Avatar sx={{ width: 32, height: 32 }}>
+                {user?.name?.substring(0, 2)}
+              </Avatar>
             </IconButton>
           </Tooltip>
           <Menu
