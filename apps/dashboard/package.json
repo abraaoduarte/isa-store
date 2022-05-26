@@ -23,15 +23,18 @@
     "@emotion/react": "^11.9.0",
     "@emotion/server": "^11.4.0",
     "@emotion/styled": "^11.8.1",
+    "@hookform/resolvers": "^2.8.10",
     "@mui/icons-material": "^5.8.0",
     "@mui/material": "^5.8.1",
     "@mui/styles": "^5.8.0",
     "next": "12.1.6",
     "react": "18.1.0",
     "react-dom": "18.1.0",
+    "react-hook-form": "^7.31.2",
     "react-is": "^18.1.0",
     "react-query": "^3.39.0",
-    "styled-components": "^5.3.5"
+    "styled-components": "^5.3.5",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@types/node": "17.0.35",
