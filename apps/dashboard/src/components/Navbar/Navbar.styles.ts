@@ -6,6 +6,11 @@ interface CustomAppBarProps extends AppBarProps {
   width: number;
 }
 
+export const StyledAppBar = styled(AppBar)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: theme.shadows[3],
+}));
+
 export const CustomAppBar = styled(AppBar, {
   shouldForwardProp: (prop) => prop !== 'isOpen',
 })<CustomAppBarProps>(({ isOpen, width, theme }) => ({
