@@ -15,6 +15,13 @@ export interface Size {
   updated_at: string;
 }
 
+export interface ProductCategory {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Paginated<T> {
   pages: number;
   total: number;

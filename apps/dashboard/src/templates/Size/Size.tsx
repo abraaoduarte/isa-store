@@ -27,6 +27,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import * as S from './FormSize.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
+import AddIcon from '@mui/icons-material/Add';
 
 type SizeTemplateProps = {
   data: Paginated<Size>;
@@ -110,6 +111,14 @@ const SizeTemplate: FC<SizeTemplateProps> = ({ data }) => {
       <CardHeader
         subheader="Insira o tamanho e dimensões das roupas"
         title="Tamanhos"
+        action={
+          <IconButton
+            aria-label="Adicionar novo tamanho"
+            onClick={() => Router.push('/sizes/create')}
+          >
+            <AddIcon />
+          </IconButton>
+        }
       />
       <Divider />
       {isLoading ? (
@@ -140,7 +149,7 @@ const SizeTemplate: FC<SizeTemplateProps> = ({ data }) => {
                       <TableCell>{size.size}</TableCell>
                       <TableCell>{size.type}</TableCell>
                       <TableCell>
-                        {format(parseISO(size.created_at), 'dd/mm/yyyy')}
+                        {format(parseISO(size.created_at), 'dd/MM/yyyy')}
                       </TableCell>
                       <TableCell width={100}>
                         <Stack direction="row" alignItems="center" spacing={1}>
