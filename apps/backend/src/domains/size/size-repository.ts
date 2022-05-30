@@ -57,7 +57,7 @@ export const update = async ({ body }: Request, uuid: string): Promise<Size> => 
   return await prisma.$transaction(async (prisma) => {
     await prisma.size.update({
       data: {
-        size: body.name,
+        size: body.size,
         type: body.type,
         description: body.description
       },

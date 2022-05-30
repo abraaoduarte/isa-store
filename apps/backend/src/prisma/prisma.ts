@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient({});
 
 prisma.$use(async (params, next) => {
+  console.log('prisma action', params.action);
   if (params.action === 'delete') {
     params.action = 'update';
     params.args.data = { deleted_at: new Date() };
@@ -20,6 +21,16 @@ prisma.$use(async (params, next) => {
   if (params.action === 'findUnique' || params.action === 'findFirst') {
     params.action = 'findFirst';
     params.args.where.deleted_at = null;
+  }
+
+  if (params.action === 'count') {
+    if (params.args.where) {
+      if (params.args.where.deleted_at === undefined) {
+        params.args.where.deleted_at = null;
+      }
+    } else {
+      params.args.where = { deleted_at: null };
+    }
   }
 
   if (params.action === 'findMany') {
