@@ -64,7 +64,7 @@ model Color {
 model ProductCategory {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
-  description String
+  description String?
   product Product?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

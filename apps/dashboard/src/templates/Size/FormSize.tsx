@@ -54,8 +54,12 @@ type FormSize = {
 };
 
 export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
-  const { data, isSuccess } = useQuery(['size', sizeId], () =>
-    api.get(`sizes/${sizeId}`),
+  const { data, isSuccess } = useQuery(
+    ['size', sizeId],
+    () => api.get(`sizes/${sizeId}`),
+    {
+      enabled: !!sizeId,
+    },
   );
 
   const {
