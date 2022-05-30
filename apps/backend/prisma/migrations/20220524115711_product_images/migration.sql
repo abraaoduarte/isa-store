@@ -15,4 +15,4 @@ CREATE TABLE "product_images" (
 CREATE UNIQUE INDEX "product_images_product_variation_id_key" ON "product_images"("product_variation_id");
 
 -- AddForeignKey
-ALTER TABLE "product_images" ADD CONSTRAINT "product_images_product_variation_id_fkey" FOREIGN KEY ("product_variation_id") REFERENCES "product_variations"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "product_images" ADD CONSTRAINT "product_images_product_variation_id_fkey" FOREIGN KEY ("product_variation_id") REFERENCES "product_variations"("id") ON DELETE CASCADE ON UPDATE CASCADE;

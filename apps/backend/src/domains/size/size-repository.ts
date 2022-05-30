@@ -54,20 +54,20 @@ export const create = async ({ body }: Request): Promise<Size> => {
 };
 
 export const update = async ({ body }: Request, uuid: string): Promise<Size> => {
-  const result = await prisma.$transaction(async (prisma) => {
-    const size = prisma.size.update({
+  return await prisma.$transaction(async (prisma) => {
+    await prisma.size.update({
       data: {
-        name: body.name
+        size: body.size,
+        type: body.type,
+        description: body.description
       },
       where: {
         id: uuid
       }
     });
 
-    return size;
+    return body;
   });
-
-  return result;
 };
 
 export const destroy = async (uuid: string): Promise<Size> => {

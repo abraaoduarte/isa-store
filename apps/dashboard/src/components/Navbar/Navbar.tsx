@@ -1,113 +1,78 @@
-import { FC, useState, useContext } from 'react';
+import { FC } from 'react';
 import {
   Avatar,
-  Divider,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Stack,
+  Badge,
+  Box,
+  IconButton,
   Toolbar,
   Tooltip,
-  Typography,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import IconButton from '@mui/material/IconButton';
-import { AuthContext } from 'contexts/AuthContext';
-import { NavbarProps } from './Navbar.interface';
-import { CustomAppBar } from './Navbar.styles';
-import { Logout, PersonAdd, Settings } from '@mui/icons-material';
+import PersonIcon from '@mui/icons-material/Person';
+import NotificationIcon from '@mui/icons-material/Notifications';
+import * as S from './Navbar.styles';
 
-const Navbar: FC<NavbarProps> = ({ isOpen = true, width, handleMenu }) => {
-  const { user } = useContext(AuthContext);
+type NavbarProps = {
+  onSidebarOpen: () => void;
+};
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const openMenu = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+const Navbar: FC<NavbarProps> = (props) => {
+  const { onSidebarOpen, ...other } = props;
 
   return (
-    <CustomAppBar position="absolute" width={width} isOpen={isOpen}>
-      <Toolbar>
-        <IconButton
-          edge="start"
-          color="inherit"
-          aria-label="open drawer"
-          onClick={handleMenu}
+    <>
+      <S.StyledAppBar
+        sx={{
+          left: {
+            lg: 280,
+          },
+          width: {
+            lg: 'calc(100% - 280px)',
+          },
+        }}
+        {...other}
+      >
+        <Toolbar
+          disableGutters
           sx={{
-            marginRight: '36px',
+            minHeight: 64,
+            left: 0,
+            px: 2,
           }}
         >
-          <MenuIcon />
-        </IconButton>
-        <Typography
-          component="h1"
-          variant="h6"
-          color="inherit"
-          noWrap
-          sx={{ flexGrow: 1 }}
-        >
-          Admin
-        </Typography>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={{ xs: 0.5, sm: 1.5 }}
-        >
-          <Tooltip title="Profile">
-            <IconButton
-              onClick={handleClick}
-              size="small"
-              sx={{ ml: 2 }}
-              aria-controls={openMenu ? 'account-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={openMenu ? 'true' : undefined}
-            >
-              <Avatar sx={{ width: 32, height: 32 }}>
-                {user?.name?.substring(0, 2)}
-              </Avatar>
+          <IconButton
+            onClick={onSidebarOpen}
+            sx={{
+              display: {
+                xs: 'inline-flex',
+                lg: 'none',
+              },
+            }}
+          >
+            <MenuIcon fontSize="small" />
+          </IconButton>
+
+          <Box sx={{ flexGrow: 1 }} />
+          <Tooltip title="Notifications">
+            <IconButton sx={{ ml: 1 }}>
+              <Badge badgeContent={4} color="primary">
+                <NotificationIcon fontSize="small" />
+              </Badge>
             </IconButton>
           </Tooltip>
-          <Menu
-            anchorEl={anchorEl}
-            id="account-menu"
-            open={openMenu}
-            onClose={handleClose}
-            onClick={handleClose}
+          <Avatar
+            sx={{
+              height: 40,
+              width: 40,
+              ml: 1,
+            }}
+            src="/static/images/avatars/avatar_1.png"
           >
-            <MenuItem>
-              <Avatar /> Profile
-            </MenuItem>
-            <MenuItem>
-              <Avatar /> My account
-            </MenuItem>
-            <Divider />
-            <MenuItem>
-              <ListItemIcon>
-                <PersonAdd fontSize="small" />
-              </ListItemIcon>
-              Add another account
-            </MenuItem>
-            <MenuItem>
-              <ListItemIcon>
-                <Settings fontSize="small" />
-              </ListItemIcon>
-              Settings
-            </MenuItem>
-            <MenuItem>
-              <ListItemIcon>
-                <Logout fontSize="small" />
-              </ListItemIcon>
-              Logout
-            </MenuItem>
-          </Menu>
-        </Stack>
-      </Toolbar>
-    </CustomAppBar>
+            <PersonIcon fontSize="small" />
+          </Avatar>
+        </Toolbar>
+      </S.StyledAppBar>
+    </>
   );
 };
 

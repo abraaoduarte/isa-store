@@ -17,6 +17,7 @@
     "prisma:generate": "prisma generate",
     "migration:create": "prisma migrate dev --create-only --name",
     "migration:run": "prisma migrate deploy",
+    "migration:revert": "prisma migrate resolve --rolled-back ",
     "generate": "yarn plop --plopfile generators/plopfile.js"
   },
   "dependencies": {
