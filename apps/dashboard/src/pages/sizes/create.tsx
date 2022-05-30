@@ -1,19 +1,12 @@
-import { Box } from '@mui/material';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
-import { FormCreate } from 'templates/Size';
+import { FormSize } from 'templates/Size';
 
 export default function Index() {
   return (
     <Base>
-      <Box
-        sx={{
-          '& > :not(style)': { m: 1, width: '25ch' },
-        }}
-      >
-        <FormCreate />
-      </Box>
+      <FormSize pageTitle="Adicionar Tamanho" />
     </Base>
   );
 }

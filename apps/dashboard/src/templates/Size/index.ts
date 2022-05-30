@@ -1,1 +1,2 @@
-export { FormCreate, FormUpdate } from './FormSize';
+export { FormSize } from './FormSize';
+export { default } from './Size';

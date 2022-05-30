@@ -20,6 +20,8 @@ const Base: FC<BaseProps> = ({ children }) => {
             flex: '1 1 auto',
             flexDirection: 'column',
             width: '100%',
+            overflow: 'hidden',
+            padding: '16px',
           }}
         >
           {children}

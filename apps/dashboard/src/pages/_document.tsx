@@ -5,37 +5,30 @@ import Document, {
   NextScript,
   DocumentContext,
 } from 'next/document';
-import { ServerStyleSheet } from 'styled-components';
 import { ServerStyleSheets } from '@mui/styles';
 import { Fragment } from 'react';
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
-    const sheet = new ServerStyleSheet();
     const materialSheets = new ServerStyleSheets();
     const originalRenderPage = ctx.renderPage;
 
-    try {
-      ctx.renderPage = () =>
-        originalRenderPage({
-          enhanceApp: (App) => (props) =>
-            sheet.collectStyles(materialSheets.collect(<App {...props} />)),
-        });
+    ctx.renderPage = () =>
+      originalRenderPage({
+        enhanceApp: (App) => (props) =>
+          materialSheets.collect(<App {...props} />),
+      });
 
-      const initialProps = await Document.getInitialProps(ctx);
-      return {
-        ...initialProps,
-        styles: [
-          <Fragment key="1">
-            {initialProps.styles}
-            {materialSheets.getStyleElement()}
-            {sheet.getStyleElement()}
-          </Fragment>,
-        ],
-      };
-    } finally {
-      sheet.seal();
-    }
+    const initialProps = await Document.getInitialProps(ctx);
+    return {
+      ...initialProps,
+      styles: [
+        <Fragment key="1">
+          {initialProps.styles}
+          {materialSheets.getStyleElement()}
+        </Fragment>,
+      ],
+    };
   }
 
   render() {

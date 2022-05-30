@@ -68,7 +68,7 @@ const Sidebar: FC<SidebarProps> = (props) => {
         />
         <Box sx={{ flexGrow: 1 }}>
           <NavItem title="Home" icon={<OpenInNewIcon />} href="/" />
-          <NavItem title="Sizes" icon={<OpenInNewIcon />} href="/sizes" />
+          <NavItem title="Medidas" icon={<OpenInNewIcon />} href="/sizes" />
         </Box>
       </Box>
     </>
