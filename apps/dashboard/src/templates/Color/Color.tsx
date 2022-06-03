@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Paginated, ProductCategory } from 'interfaces/api';
+import { Paginated, Color } from 'interfaces/api';
 import { format, parseISO } from 'date-fns';
 import { useMutation, useQuery } from 'react-query';
 import { api } from 'services/api';
@@ -25,13 +25,13 @@ import Router from 'next/router';
 import { AxiosResponse } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as S from './FormProductCategory.styles';
+import * as S from './Color.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
 import AddIcon from '@mui/icons-material/Add';
 
-type ProductCategoryTemplateProps = {
-  data: Paginated<ProductCategory>;
+type ColorProps = {
+  data: Paginated<Color>;
 };
 
 type DialogProps = {
@@ -39,31 +39,27 @@ type DialogProps = {
   isOpen: boolean;
 };
 
-const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
-  data,
-}) => {
+const Color: FC<ColorProps> = ({ data }) => {
   const [page, setPage] = useState(0);
   const [dialog, setDialog] = useState<DialogProps>({
     isOpen: false,
   });
-  const [ProductCategories, setProductCategories] =
-    useState<Paginated<ProductCategory>>(data);
+  const [color, setcolors] = useState<Paginated<Color>>(data);
   const { enqueueSnackbar } = useSnackbar();
 
   const { isLoading } = useQuery(
-    ['productCategories', page === 0 ? 1 : page + 1],
-    () => api.get(`product-categories/?page=${page === 0 ? 1 : page + 1}`),
+    ['color', page === 0 ? 1 : page + 1],
+    () => api.get(`colors/?page=${page === 0 ? 1 : page + 1}`),
     {
       onSuccess: (res) => {
-        setProductCategories(res.data);
+        setcolors(res.data);
       },
       keepPreviousData: true,
     },
   );
 
   const deleteSize = useMutation<AxiosResponse, Error, string, unknown>(
-    (productCactegoryId) =>
-      api.delete(`/product-categories/${productCactegoryId}`),
+    (colorId) => api.delete(`/colors/${colorId}`),
   );
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -88,15 +84,13 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
     if (dialog.id) {
       deleteSize.mutate(dialog.id, {
         onSuccess: () => {
-          setProductCategories((oldProductCategories) => ({
-            ...oldProductCategories,
-            total: oldProductCategories.total - 1,
-            result: oldProductCategories.result.filter(
-              (productCategory) => productCategory.id !== dialog.id,
-            ),
+          setcolors((oldColors) => ({
+            ...oldColors,
+            total: oldColors.total - 1,
+            result: oldColors.result.filter((color) => color.id !== dialog.id),
           }));
 
-          enqueueSnackbar('Categoria deletada com sucesso!', {
+          enqueueSnackbar('Cor deletada com sucesso!', {
             variant: 'success',
           });
         },
@@ -116,12 +110,12 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
   return (
     <S.StyledCard>
       <CardHeader
-        subheader="Insira uma nova categoria"
-        title="Categorias"
+        subheader="Insira uma nova cor"
+        title="Cores"
         action={
           <IconButton
-            aria-label="Adicionar nova categoria"
-            onClick={() => Router.push('/product-categories/create')}
+            aria-label="Adicionar nova cor"
+            onClick={() => Router.push('/colors/create')}
           >
             <AddIcon />
           </IconButton>
@@ -141,30 +135,27 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
         <CardContent>
           <Grid container spacing={4}>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-              {ProductCategories.result.length > 0 ? (
+              {color.result.length > 0 ? (
                 <>
                   <Table stickyHeader aria-label="sticky table">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Categoria</TableCell>
+                        <TableCell>Cor</TableCell>
                         <TableCell>Criado em</TableCell>
                         <TableCell>Ações</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {ProductCategories.result.map((productCategory) => (
+                      {color.result.map((Color) => (
                         <TableRow
                           hover
                           role="checkbox"
                           tabIndex={-1}
-                          key={productCategory.id}
+                          key={Color.id}
                         >
-                          <TableCell>{productCategory.name}</TableCell>
+                          <TableCell>{Color.name}</TableCell>
                           <TableCell>
-                            {format(
-                              parseISO(productCategory.created_at),
-                              'dd/MM/yyyy',
-                            )}
+                            {format(parseISO(Color.created_at), 'dd/MM/yyyy')}
                           </TableCell>
                           <TableCell width={100}>
                             <Stack
@@ -177,17 +168,13 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
                                 color="default"
                                 size="small"
                                 onClick={() => {
-                                  Router.push(
-                                    `/product-categories/${productCategory.id}/update`,
-                                  );
+                                  Router.push(`/colors/${Color.id}/update`);
                                 }}
                               >
                                 <EditIcon fontSize="inherit" />
                               </IconButton>
                               <IconButton
-                                onClick={() =>
-                                  handleOpenCustomDialog(productCategory.id)
-                                }
+                                onClick={() => handleOpenCustomDialog(Color.id)}
                                 aria-label="delete"
                                 color="error"
                                 size="small"
@@ -203,7 +190,7 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
                   <TablePagination
                     rowsPerPageOptions={[]}
                     component="div"
-                    count={ProductCategories.total}
+                    count={color.total}
                     rowsPerPage={10}
                     page={page}
                     showFirstButton
@@ -237,4 +224,4 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
   );
 };
 
-export default ProductCategoryTemplate;
+export default Color;
