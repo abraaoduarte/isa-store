@@ -29,6 +29,15 @@ export interface Color {
   updated_at: string;
 }
 
+export interface Brand {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Paginated<T> {
   pages: number;
   total: number;
