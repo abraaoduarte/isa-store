@@ -1,9 +1,10 @@
 import { isEmpty, isNil } from 'ramda';
 import { ParsedQs } from 'qs';
-import { Product } from '@prisma/client';
+import { Product, ProductVariation, User } from '@prisma/client';
 import { RepositoryList } from 'interfaces';
 import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
+import pMap from 'p-map';
 import { Request } from 'koa';
 
 export const index = async (query: ParsedQs): Promise<RepositoryList<Product[]>> => {
@@ -27,6 +28,9 @@ export const show = async (uuid: string): Promise<Product> => {
   const product = await prisma.product.findUnique({
     where: {
       id: uuid
+    },
+    include: {
+      productVariation: true
     }
   });
 
@@ -37,22 +41,34 @@ export const show = async (uuid: string): Promise<Product> => {
   return product;
 };
 
-export const create = async ({ body }: Request): Promise<Product> => {
+export const create = async ({ body }: Request, user: User): Promise<Product> => {
   const result = await prisma.$transaction(async (prisma) => {
-    const product = prisma.product.create({
+    const product = await prisma.product.create({
       data: {
         name: body.name,
         description: body.description,
-        price: body.price,
-        banner: body.banner,
-        discount: body.discount,
-        quantity: body.quantity,
-        is_active: body.is_active,
-        user_id: body.user_id,
+        price: Number(body.price),
+        banner: 'body.banner',
+        discount: Number(body.discount),
+        quantity: Number(body.quantity),
+        is_active: true,
+        user_id: user.id,
         brand_id: body.brand_id,
         product_category_id: body.product_category_id
       }
     });
+
+    await pMap(body.productVariation, async (productVariation: ProductVariation) => {
+      await prisma.productVariation.create({
+
+        data: {
+          ...productVariation,
+          user_id: user.id,
+          is_active: true,
+          product_id: product.id
+        }
+      });
+    }, { concurrency: 2 });
 
     return product;
   });
@@ -60,18 +76,18 @@ export const create = async ({ body }: Request): Promise<Product> => {
   return result;
 };
 
-export const update = async ({ body }: Request, uuid: string): Promise<Product> => {
+export const update = async ({ body }: Request, uuid: string, user: User): Promise<Product> => {
   const result = await prisma.$transaction(async (prisma) => {
-    const product = prisma.product.update({
+    const product = await prisma.product.update({
       data: {
         name: body.name,
         description: body.description,
-        price: body.price,
-        banner: body.banner,
-        discount: body.discount,
-        quantity: body.quantity,
-        is_active: body.is_active,
-        user_id: body.user_id,
+        price: Number(body.price),
+        banner: 'body.banner',
+        discount: Number(body.discount),
+        quantity: Number(body.quantity),
+        is_active: true,
+        user_id: user.id,
         brand_id: body.brand_id,
         product_category_id: body.product_category_id
       },
@@ -79,6 +95,19 @@ export const update = async ({ body }: Request, uuid: string): Promise<Product> 
         id: uuid
       }
     });
+
+    // REMOVE ALL and UPDATE
+    // await pMap(body.productVariation, async (productVariation: ProductVariation) => {
+    //   await prisma.productVariation.create({
+
+    //     data: {
+    //       ...productVariation,
+    //       user_id: user.id,
+    //       is_active: true,
+    //       product_id: product.id
+    //     }
+    //   });
+    // }, { concurrency: 2 });
 
     return product;
   });

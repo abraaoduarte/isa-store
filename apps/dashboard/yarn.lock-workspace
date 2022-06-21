@@ -160,6 +160,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dinero.js/calculator-number@npm:2.0.0-alpha.8":
+  version: 2.0.0-alpha.8
+  resolution: "@dinero.js/calculator-number@npm:2.0.0-alpha.8"
+  dependencies:
+    "@dinero.js/core": 2.0.0-alpha.8
+  checksum: 843f05ba3f30e08f78469f1ad0c83bcbbc789455a60061a5a956867c950b2e627ad17708d86e088ff2bc39458d847ba242f6e5c6cdedca1db9d61965f60195b4
+  languageName: node
+  linkType: hard
+
+"@dinero.js/core@npm:2.0.0-alpha.8":
+  version: 2.0.0-alpha.8
+  resolution: "@dinero.js/core@npm:2.0.0-alpha.8"
+  dependencies:
+    "@dinero.js/currencies": 2.0.0-alpha.8
+  checksum: a747cec35e6709e23d8e41666fcce467faffa58248dbbd3440785dbecc8fc55379f608e16ecb7fe9c0007e29b1872f05666ce10891138fe0f856d0e825ecfe2d
+  languageName: node
+  linkType: hard
+
+"@dinero.js/currencies@npm:2.0.0-alpha.8":
+  version: 2.0.0-alpha.8
+  resolution: "@dinero.js/currencies@npm:2.0.0-alpha.8"
+  checksum: db1e2e775df9c2c211f245bd966c9f66d7e3fb7b6989ce6f2246b2c5685337c72eb9b1ae9c38adcb5aa745f5a7e6f8c8e3207dac47f87ab31698b5e9b00c3206
+  languageName: node
+  linkType: hard
+
 "@emotion/babel-plugin@npm:^11.7.1":
   version: 11.9.2
   resolution: "@emotion/babel-plugin@npm:11.9.2"
@@ -1403,6 +1428,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.26.0
     axios: ^0.27.2
     date-fns: ^2.28.0
+    dinero.js: alpha
     eslint: 8.16.0
     eslint-config-next: 12.1.6
     eslint-config-prettier: ^8.5.0
@@ -1415,7 +1441,9 @@ __metadata:
     react: 18.1.0
     react-dom: 18.1.0
     react-hook-form: ^7.31.2
+    react-imask: ^6.4.2
     react-is: ^18.1.0
+    react-number-format: ^4.9.3
     react-query: ^3.39.0
     typescript: 4.6.4
     yup: ^0.32.11
@@ -1487,6 +1515,17 @@ __metadata:
   version: 2.1.0
   resolution: "detect-node@npm:2.1.0"
   checksum: 832184ec458353e41533ac9c622f16c19f7c02d8b10c303dfd3a756f56be93e903616c0bb2d4226183c9351c15fc0b3dba41a17a2308262afabcfa3776e6ae6e
+  languageName: node
+  linkType: hard
+
+"dinero.js@npm:alpha":
+  version: 2.0.0-alpha.8
+  resolution: "dinero.js@npm:2.0.0-alpha.8"
+  dependencies:
+    "@dinero.js/calculator-number": 2.0.0-alpha.8
+    "@dinero.js/core": 2.0.0-alpha.8
+    "@dinero.js/currencies": 2.0.0-alpha.8
+  checksum: ca57fc25fa296d3b188ff4b6c47b21461d8d709c8b55c41cb5ce848b7f4986e882ed06ed6348a2c088406a6a57ef683c112b472c7af88c84903d95483ebd0a69
   languageName: node
   linkType: hard
 
@@ -2263,6 +2302,13 @@ __metadata:
   version: 5.2.0
   resolution: "ignore@npm:5.2.0"
   checksum: 6b1f926792d614f64c6c83da3a1f9c83f6196c2839aa41e1e32dd7b8d174cef2e329d75caabb62cb61ce9dc432f75e67d07d122a037312db7caa73166a1bdb77
+  languageName: node
+  linkType: hard
+
+"imask@npm:^6.4.2":
+  version: 6.4.2
+  resolution: "imask@npm:6.4.2"
+  checksum: a713aec87f23b1b095aa3a515311222346211dc544bfcae25d4a0aa3bca9a8c13a3269985d8b913cd9af013b733cdae7f81278988d04a9a34b173744b081c0e9
   languageName: node
   linkType: hard
 
@@ -3247,6 +3293,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-imask@npm:^6.4.2":
+  version: 6.4.2
+  resolution: "react-imask@npm:6.4.2"
+  dependencies:
+    imask: ^6.4.2
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ">=0.14.0"
+  checksum: be31fca7780ca5592b59b44ca3789124ebd2c35903711eb85c1668f069e3d1c9bc2f332dd69e2a2d97513f63a75e4565c4c6310dcb1005d9c7585ae60b9f44a3
+  languageName: node
+  linkType: hard
+
 "react-is@npm:^16.13.1, react-is@npm:^16.7.0":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -3265,6 +3323,18 @@ __metadata:
   version: 18.1.0
   resolution: "react-is@npm:18.1.0"
   checksum: d206a0fe6790851bff168727bfb896de02c5591695afb0c441163e8630136a3e13ee1a7ddd59fdccddcc93968b4721ae112c10f790b194b03b35a3dc13a355ef
+  languageName: node
+  linkType: hard
+
+"react-number-format@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "react-number-format@npm:4.9.3"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    react-dom: ^0.14 || ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+  checksum: 74460ee813284b78d37e4459891d63b49e3276e1e506ffe85057696b9b4793e0fc9b8a77222e50cdc4ecefddb764774a20d2cfc92dce26aed13316b3f2e3b9c9
   languageName: node
   linkType: hard
 

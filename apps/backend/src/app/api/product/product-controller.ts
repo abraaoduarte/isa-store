@@ -21,7 +21,7 @@ export const show = wrap((req: Context) =>
 );
 
 export const create = wrap((req: Context) =>
-  productRepository.create(req.request).then((product) => ({
+  productRepository.create(req.request, req.state.user).then((product) => ({
     body: {
       message: 'success',
       result: product
@@ -30,7 +30,7 @@ export const create = wrap((req: Context) =>
 );
 
 export const update = wrap((req: Context) =>
-  productRepository.update(req.request, req.params.uuid).then((product) => ({
+  productRepository.update(req.request, req.params.uuid, req.state.user).then((product) => ({
     body: {
       message: 'success',
       result: product
