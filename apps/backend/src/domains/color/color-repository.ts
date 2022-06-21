@@ -6,7 +6,17 @@ import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
 import { Request } from 'koa';
 
-export const index = async (query: ParsedQs): Promise<RepositoryList<Color[]>> => {
+export const index = async (): Promise<Color[]> => {
+  const results = await prisma.color.findMany({
+    where: {
+      deleted_at: null
+    }
+  });
+
+  return results;
+};
+
+export const paginate = async (query: ParsedQs): Promise<RepositoryList<Color[]>> => {
   const { page, limit, currentPage } = pagination(query);
 
   const total = await prisma.color.count();

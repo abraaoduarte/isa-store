@@ -10,6 +10,7 @@ const router = new Router({
   .use(locker.api());
 
 router.get('/', controller.index);
+router.get('/paginate', controller.paginate);
 router.get('/:uuid', validate.params(makeUuidSchema('uuid')), controller.show);
 router.post('/', validate.body(CreateBrandSchema), controller.create);
 router.patch(

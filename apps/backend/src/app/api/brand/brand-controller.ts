@@ -3,7 +3,16 @@ import * as brandRepository from 'domains/brand/brand-repository';
 import { wrap } from 'utils/wrap';
 
 export const index = wrap((req: Context) =>
-  brandRepository.index(req.query).then((brands) => ({
+  brandRepository.index().then((brands) => ({
+    body: {
+      message: 'success',
+      result: brands
+    }
+  }))
+);
+
+export const paginate = wrap((req: Context) =>
+  brandRepository.paginate(req.query).then((brands) => ({
     body: {
       message: 'success',
       ...brands

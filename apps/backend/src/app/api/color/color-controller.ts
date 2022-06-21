@@ -3,7 +3,16 @@ import * as colorRepository from 'domains/color/color-repository';
 import { wrap } from 'utils/wrap';
 
 export const index = wrap((req: Context) =>
-  colorRepository.index(req.query).then((colors) => ({
+  colorRepository.index().then((colors) => ({
+    body: {
+      message: 'success',
+      result: colors
+    }
+  }))
+);
+
+export const paginate = wrap((req: Context) =>
+  colorRepository.paginate(req.query).then((colors) => ({
     body: {
       message: 'success',
       ...colors
