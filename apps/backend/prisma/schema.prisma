@@ -14,8 +14,8 @@ model User {
   name String
   password String
   is_active Boolean? @default(false)
-  product Product?
-  productVariation ProductVariation?
+  product Product[]
+  productVariation ProductVariation[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -27,7 +27,7 @@ model Brand {
   name String
   description String?
   image String?
-  product Product?
+  product Product[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -44,7 +44,7 @@ model Size {
   size String
   description String?
   type SizeType
-  productVariation ProductVariation?
+  productVariation ProductVariation[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -54,7 +54,7 @@ model Size {
 model Color {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
-  productVariation ProductVariation?
+  productVariation ProductVariation[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -65,7 +65,7 @@ model ProductCategory {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
   description String?
-  product Product?
+  product Product[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -87,7 +87,7 @@ model Product {
   brand_id String @db.Uuid
   productCategory ProductCategory @relation(fields: [product_category_id], references: [id], onDelete: Cascade)
   product_category_id String @db.Uuid
-  productVariation ProductVariation?
+  productVariation ProductVariation[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?

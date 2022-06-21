@@ -3,7 +3,16 @@ import * as sizeRepository from 'domains/size/size-repository';
 import { wrap } from 'utils/wrap';
 
 export const index = wrap((req: Context) =>
-  sizeRepository.index(req.query).then((sizes) => ({
+  sizeRepository.index().then((sizes) => ({
+    body: {
+      message: 'success',
+      result: sizes
+    }
+  }))
+);
+
+export const paginate = wrap((req: Context) =>
+  sizeRepository.paginate(req.query).then((sizes) => ({
     body: {
       message: 'success',
       ...sizes

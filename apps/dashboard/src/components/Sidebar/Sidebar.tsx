@@ -76,6 +76,7 @@ const Sidebar: FC<SidebarProps> = (props) => {
           />
           <NavItem title="Cores" icon={<OpenInNewIcon />} href="/colors" />
           <NavItem title="Marcas" icon={<OpenInNewIcon />} href="/brands" />
+          <NavItem title="Produtos" icon={<OpenInNewIcon />} href="/products" />
         </Box>
       </Box>
     </>

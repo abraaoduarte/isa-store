@@ -6,7 +6,17 @@ import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
 import { Request } from 'koa';
 
-export const index = async (query: ParsedQs): Promise<RepositoryList<ProductCategory[]>> => {
+export const index = async (): Promise<ProductCategory[]> => {
+  const results = await prisma.productCategory.findMany({
+    where: {
+      deleted_at: null
+    }
+  });
+
+  return results;
+};
+
+export const paginate = async (query: ParsedQs): Promise<RepositoryList<ProductCategory[]>> => {
   const { page, limit, currentPage } = pagination(query);
 
   const total = await prisma.productCategory.count();

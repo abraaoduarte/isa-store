@@ -3,7 +3,16 @@ import * as productCategoryRepository from 'domains/product-category/product-cat
 import { wrap } from 'utils/wrap';
 
 export const index = wrap((req: Context) =>
-  productCategoryRepository.index(req.query).then((productCategories) => ({
+  productCategoryRepository.index().then((productCategories) => ({
+    body: {
+      message: 'success',
+      result: productCategories
+    }
+  }))
+);
+
+export const paginate = wrap((req: Context) =>
+  productCategoryRepository.paginate(req.query).then((productCategories) => ({
     body: {
       message: 'success',
       ...productCategories
