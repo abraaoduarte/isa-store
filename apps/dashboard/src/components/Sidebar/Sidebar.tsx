@@ -9,6 +9,11 @@ import {
   Typography,
 } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import SquareFootIcon from '@mui/icons-material/SquareFoot';
+import CategoryIcon from '@mui/icons-material/Category';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import GridViewIcon from '@mui/icons-material/GridView';
+import CheckroomIcon from '@mui/icons-material/Checkroom';
 import NavItem from 'components/NavItem/NavItem';
 
 type SidebarProps = {
@@ -68,15 +73,26 @@ const Sidebar: FC<SidebarProps> = (props) => {
         />
         <Box sx={{ flexGrow: 1 }}>
           <NavItem title="Home" icon={<OpenInNewIcon />} href="/" />
-          <NavItem title="Medidas" icon={<OpenInNewIcon />} href="/sizes" />
+          <Divider sx={{ borderColor: '#2D3748' }} />
+          <Box
+            sx={{
+              px: 2,
+              py: 3,
+            }}
+          >
+            <Typography color="neutral.100" variant="subtitle2">
+              Produtos
+            </Typography>
+          </Box>
+          <NavItem title="Medidas" icon={<SquareFootIcon />} href="/sizes" />
           <NavItem
             title="Categoria do produto"
-            icon={<OpenInNewIcon />}
+            icon={<CategoryIcon />}
             href="/product-categories"
           />
-          <NavItem title="Cores" icon={<OpenInNewIcon />} href="/colors" />
-          <NavItem title="Marcas" icon={<OpenInNewIcon />} href="/brands" />
-          <NavItem title="Produtos" icon={<OpenInNewIcon />} href="/products" />
+          <NavItem title="Cores" icon={<ColorLensIcon />} href="/colors" />
+          <NavItem title="Marcas" icon={<GridViewIcon />} href="/brands" />
+          <NavItem title="Produtos" icon={<CheckroomIcon />} href="/products" />
         </Box>
       </Box>
     </>
