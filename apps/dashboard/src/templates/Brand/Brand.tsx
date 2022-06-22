@@ -1,11 +1,9 @@
 import React, { FC, useState } from 'react';
-import { Paginated, Brand } from 'interfaces/api';
 import { format, parseISO } from 'date-fns';
 import { useMutation, useQuery } from 'react-query';
 import { api } from 'services/api';
 import {
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   Table,
@@ -15,41 +13,33 @@ import {
   TableRow,
   Paper,
   TableBody,
-  Box,
   Stack,
   IconButton,
   Typography,
 } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 import Router from 'next/router';
 import { AxiosResponse } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as S from './FormBrand.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
 import AddIcon from '@mui/icons-material/Add';
-
-type BrandTemplateProps = {
-  data: Paginated<Brand>;
-};
-
-type DialogProps = {
-  id?: string;
-  isOpen: boolean;
-};
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
+import { DialogControlProps } from 'components/CustomDialog/CustomDialog.interface';
+import { BrandTemplateProps, PaginatedBrand } from './Brand.interface';
 
 const BrandTemplate: FC<BrandTemplateProps> = ({ data }) => {
   const [page, setPage] = useState(0);
-  const [dialog, setDialog] = useState<DialogProps>({
+  const [dialog, setDialog] = useState<DialogControlProps>({
     isOpen: false,
   });
-  const [brands, setBrands] = useState<Paginated<Brand>>(data);
+  const [brands, setBrands] = useState<PaginatedBrand>(data);
   const { enqueueSnackbar } = useSnackbar();
 
   const { isLoading } = useQuery(
     ['brands', page === 0 ? 1 : page + 1],
-    () => api.get(`brands/?page=${page === 0 ? 1 : page + 1}`),
+    () => api.get(`brands/paginate/?page=${page === 0 ? 1 : page + 1}`),
     {
       onSuccess: (res) => {
         setBrands(res.data);
@@ -108,32 +98,21 @@ const BrandTemplate: FC<BrandTemplateProps> = ({ data }) => {
   };
 
   return (
-    <S.StyledCard>
+    <>
       <CardHeader
-        subheader="Insira uma nova marca"
+        subHeader="Listagem de marcas inseridas"
         title="Marcas"
-        action={
-          <IconButton
-            aria-label="Adicionar nova marca"
-            onClick={() => Router.push('/brands/create')}
-          >
-            <AddIcon />
-          </IconButton>
-        }
+        label="Adicionar nova marca"
+        iconRight={<AddIcon />}
+        onClick={() => Router.push('/brands/create')}
       />
+
       <Divider />
       {isLoading ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
+        <LoadingProgress />
       ) : (
         <CardContent>
-          <Grid container spacing={4}>
+          <Grid container>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               {brands.result.length > 0 ? (
                 <>
@@ -222,7 +201,7 @@ const BrandTemplate: FC<BrandTemplateProps> = ({ data }) => {
           />
         </CardContent>
       )}
-    </S.StyledCard>
+    </>
   );
 };
 

@@ -1,17 +1,13 @@
 import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
-
 import Base from 'templates/Base';
 import { FormSize } from 'templates/Size';
+import { FormSizeTemplateProps } from 'templates/Size/Size.interface';
 
-type SizeUpdateProps = {
-  id: string;
-};
-
-export default function SizeUpdate(props: SizeUpdateProps) {
+export default function SizeUpdate(props: FormSizeTemplateProps) {
   return (
     <Base>
-      <FormSize pageTitle="Atualize o tamanho" sizeId={props.id} />
+      <FormSize {...props} pageTitle="Atualize o tamanho" />
     </Base>
   );
 }
@@ -32,7 +28,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   return {
     props: {
-      id,
+      sizeId: id,
     },
   };
 };

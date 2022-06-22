@@ -1,16 +1,12 @@
-import { Paginated, Brand } from 'interfaces/api';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
 import Base from 'templates/Base';
 import BrandTemplate from 'templates/Brand';
+import { BrandTemplateProps } from 'templates/Brand/Brand.interface';
 
-type BrandProps = {
-  data: Paginated<Brand>;
-};
-
-export default function Index(props: BrandProps) {
+export default function Index(props: BrandTemplateProps) {
   return (
     <Base>
       <BrandTemplate data={props.data} />
@@ -36,7 +32,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     'productCategories',
     () =>
       api
-        .get('brands', {
+        .get('brands/paginate', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

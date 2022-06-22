@@ -1,12 +1,5 @@
 import { FC, useEffect } from 'react';
-import {
-  Box,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  TextField,
-} from '@mui/material';
+import { Box, CardContent, Divider, Grid, TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -18,13 +11,9 @@ import { isEmpty } from 'ramda';
 import yup from 'utils/yup';
 import { api } from 'services/api';
 import { AxiosResponse } from 'axios';
-import * as S from './FormBrand.styles';
-
-type BrandDataProps = {
-  name: string;
-  type: string;
-  description?: string;
-};
+import { BrandFormValues, FormBrandTemplateProps } from './Brand.interface';
+import LoadingProgress from 'components/LoadingProgress';
+import CardHeader from 'components/CardHeader';
 
 const schema = yup
   .object({
@@ -32,13 +21,11 @@ const schema = yup
   })
   .required();
 
-type FormBrand = {
-  pageTitle: string;
-  brandId?: string;
-};
-
-export const FormBrand: FC<FormBrand> = ({ pageTitle, brandId }) => {
-  const { data, isSuccess } = useQuery(
+export const FormBrand: FC<FormBrandTemplateProps> = ({
+  pageTitle,
+  brandId,
+}) => {
+  const { data, isSuccess, isError } = useQuery(
     ['brands', brandId],
     () => api.get(`brands/${brandId}`),
     {
@@ -51,20 +38,20 @@ export const FormBrand: FC<FormBrand> = ({ pageTitle, brandId }) => {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<BrandDataProps>({
+  } = useForm<BrandFormValues>({
     resolver: yupResolver(schema),
   });
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const addBrand = useMutation<AxiosResponse, Error, BrandDataProps, unknown>(
+  const addBrand = useMutation<AxiosResponse, Error, BrandFormValues, unknown>(
     (data) => api.post('/brands', data),
   );
 
   const updateBrand = useMutation<
     AxiosResponse,
     Error,
-    BrandDataProps,
+    BrandFormValues,
     unknown
   >((data) => api.patch(`/brands/${brandId}`, data));
 
@@ -76,7 +63,7 @@ export const FormBrand: FC<FormBrand> = ({ pageTitle, brandId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brandId, data]);
 
-  const onSubmit = (data: BrandDataProps) => {
+  const onSubmit = (data: BrandFormValues) => {
     brandId
       ? updateBrand.mutate(data, {
           onSuccess: () => {
@@ -100,67 +87,71 @@ export const FormBrand: FC<FormBrand> = ({ pageTitle, brandId }) => {
         });
   };
 
-  if ((!isSuccess && !brandId) || (brandId && !isSuccess)) {
-    // Router.push('/404');
+  if (isError) {
+    Router.push('/404');
   }
 
   return (
-    <S.StyledCard>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subheader="Insira a marca" title={pageTitle} />
+        <CardHeader subHeader="Insira a marca" title={pageTitle} />
         <Divider />
-        <CardContent>
-          <Grid container spacing={4}>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    autoComplete="false"
-                    helperText={error?.message || 'Nome da marca'}
-                    label="Nome"
-                    name="name"
-                    onBlur={onBlur}
-                    type="text"
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  />
-                )}
-                name="name"
-              />
+        {brandId && !isSuccess ? (
+          <LoadingProgress />
+        ) : (
+          <CardContent>
+            <Grid container spacing={4}>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      fullWidth
+                      autoComplete="false"
+                      helperText={error?.message}
+                      label="Nome"
+                      name="name"
+                      onBlur={onBlur}
+                      type="text"
+                      onChange={onChange}
+                      value={value ?? ''}
+                      variant="outlined"
+                    />
+                  )}
+                  name="name"
+                />
+              </Grid>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      helperText={error?.message}
+                      sx={{ width: '100%' }}
+                      id="outlined-multiline-static"
+                      label="Descrição"
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value ?? ''}
+                      multiline
+                      rows={6}
+                      name="description"
+                    />
+                  )}
+                  name="description"
+                />
+              </Grid>
             </Grid>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    helperText={error?.message || 'Descrição'}
-                    sx={{ width: '100%' }}
-                    id="outlined-multiline-static"
-                    label="Descrição"
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value ?? ''}
-                    multiline
-                    rows={6}
-                    name="description"
-                  />
-                )}
-                name="description"
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
+          </CardContent>
+        )}
         <Divider />
         <Box
           sx={{
@@ -182,6 +173,6 @@ export const FormBrand: FC<FormBrand> = ({ pageTitle, brandId }) => {
           </LoadingButton>
         </Box>
       </form>
-    </S.StyledCard>
+    </>
   );
 };
