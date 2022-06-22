@@ -1,4 +1,5 @@
 import { styled } from '@mui/material/styles';
+import { Card } from '@mui/material';
 
 export const Container = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -8,4 +9,8 @@ export const Container = styled('div')(({ theme }) => ({
   [theme.breakpoints.up('lg')]: {
     paddingLeft: 280,
   },
+}));
+
+export const StyledCard = styled(Card)(() => ({
+  minWidth: '100%',
 }));
