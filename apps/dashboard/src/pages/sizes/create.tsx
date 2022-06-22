@@ -6,7 +6,7 @@ import { FormSize } from 'templates/Size';
 export default function Index() {
   return (
     <Base>
-      <FormSize pageTitle="Adicionar Tamanho" />
+      <FormSize pageTitle="Adicionar Medida" />
     </Base>
   );
 }

@@ -1,16 +1,12 @@
-import { Paginated, Size } from 'interfaces/api';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
 import Base from 'templates/Base';
 import SizeTemplate from 'templates/Size';
+import { SizeTemplateListProps } from 'templates/Size/Size.interface';
 
-type SizeProps = {
-  data: Paginated<Size>;
-};
-
-export default function Index(props: SizeProps) {
+export default function Index(props: SizeTemplateListProps) {
   return (
     <Base>
       <SizeTemplate data={props.data} />
@@ -36,7 +32,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     'sizes',
     () =>
       api
-        .get('sizes', {
+        .get('sizes/paginate', {
+          withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
           },

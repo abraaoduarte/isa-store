@@ -2,10 +2,14 @@ import { FC, useEffect } from 'react';
 import {
   Box,
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   TextField,
+  Select,
+  MenuItem,
+  FormHelperText,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
@@ -18,13 +22,9 @@ import { isEmpty } from 'ramda';
 import yup from 'utils/yup';
 import { api } from 'services/api';
 import { AxiosResponse } from 'axios';
-import * as S from './FormSize.styles';
-
-type SizeDataProps = {
-  size: string;
-  type: string;
-  description?: string;
-};
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
+import { FormSizeTemplateProps, SizeFormValues } from './Size.interface';
 
 const schema = yup
   .object({
@@ -35,8 +35,8 @@ const schema = yup
 
 const TYPES = [
   {
-    value: undefined,
-    label: 'Escolha uma medida',
+    value: '',
+    label: 'Selecione o tipo de medida',
   },
   {
     value: 'NUMERIC',
@@ -48,13 +48,8 @@ const TYPES = [
   },
 ];
 
-type FormSize = {
-  pageTitle: string;
-  sizeId?: string;
-};
-
-export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
-  const { data, isSuccess } = useQuery(
+export const FormSize: FC<FormSizeTemplateProps> = ({ pageTitle, sizeId }) => {
+  const { data, isSuccess, isError } = useQuery(
     ['size', sizeId],
     () => api.get(`sizes/${sizeId}`),
     {
@@ -68,7 +63,7 @@ export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<SizeDataProps>({
+  } = useForm<SizeFormValues>({
     resolver: yupResolver(schema),
   });
 
@@ -76,11 +71,11 @@ export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const addSize = useMutation<AxiosResponse, Error, SizeDataProps, unknown>(
+  const addSize = useMutation<AxiosResponse, Error, SizeFormValues, unknown>(
     (data) => api.post('/sizes', data),
   );
 
-  const updateSize = useMutation<AxiosResponse, Error, SizeDataProps, unknown>(
+  const updateSize = useMutation<AxiosResponse, Error, SizeFormValues, unknown>(
     (data) => api.patch(`/sizes/${sizeId}`, data),
   );
 
@@ -93,7 +88,7 @@ export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sizeId, data]);
 
-  const onSubmit = (data: SizeDataProps) => {
+  const onSubmit = (data: SizeFormValues) => {
     sizeId
       ? updateSize.mutate(data, {
           onSuccess: () => {
@@ -117,123 +112,130 @@ export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
         });
   };
 
-  if ((!isSuccess && !sizeId) || (sizeId && !isSuccess)) {
-    // Router.push('/404');
+  if (isError) {
+    Router.push('/404');
   }
 
   return (
-    <S.StyledCard>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader
-          subheader="Insira o tamanho e dimensões das roupas"
-          title={pageTitle}
-        />
+        <CardHeader subHeader="Insira a medida da roupa" title={pageTitle} />
         <Divider />
-        <CardContent>
-          <Grid container spacing={4}>
-            <Grid item md={6} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    label="Selecione o tipo de medida"
-                    helperText={
-                      error?.message ||
-                      'Se a medida é letra ou numero ex (G or 42)'
-                    }
-                    name="type"
-                    onBlur={onBlur}
-                    onChange={(value) => {
-                      setValue('size', '');
-                      onChange(value);
-                    }}
-                    required
-                    select
-                    SelectProps={{ native: true }}
-                    value={value ?? data?.data?.result?.type ?? ''}
-                    variant="outlined"
-                  >
-                    {TYPES.map((option, index) => (
-                      <option key={index} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </TextField>
-                )}
-                name="type"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    autoComplete="false"
-                    helperText={
-                      error?.message || 'Tamanho do tamanho ex (M, P, 38)'
-                    }
-                    label="Tamanho"
-                    name="size"
-                    onBlur={onBlur}
-                    type={values.type === 'NUMERIC' ? 'number' : 'text'}
-                    onChange={(event) => {
-                      const isLetters = (str: string) =>
-                        /^[A-Za-z]*$/.test(str);
-                      if (
-                        values.type !== 'NUMERIC' &&
-                        isLetters(event.target.value)
-                      ) {
-                        return onChange(event.target.value);
+        {sizeId && !isSuccess ? (
+          <LoadingProgress />
+        ) : (
+          <CardContent>
+            <Grid container spacing={4}>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <>
+                      <FormControl fullWidth>
+                        <InputLabel id="demo-simple-select-helper-label">
+                          Selecione o tipo de medida
+                        </InputLabel>
+                        <Select
+                          error={!!error}
+                          fullWidth
+                          label="Selecione o tipo de medida"
+                          name="type"
+                          onBlur={onBlur}
+                          onChange={(value) => {
+                            console.log('value', value);
+                            setValue('size', '');
+                            onChange(value);
+                          }}
+                          displayEmpty
+                          value={value ?? data?.data?.result?.type ?? ''}
+                          variant="outlined"
+                        >
+                          {TYPES.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        <FormHelperText error={!!error}>
+                          {error?.message ||
+                            'Se a medida é letra ou numero ex (G or 42)'}
+                        </FormHelperText>
+                      </FormControl>
+                    </>
+                  )}
+                  name="type"
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      fullWidth
+                      autoComplete="false"
+                      helperText={
+                        error?.message || 'Tamanho do tamanho ex (M, P, 38)'
                       }
+                      label="Tamanho"
+                      name="size"
+                      disabled={!values.type}
+                      onBlur={onBlur}
+                      type={values.type === 'NUMERIC' ? 'number' : 'text'}
+                      onChange={(event) => {
+                        const isLetters = (str: string) =>
+                          /^[A-Za-z]*$/.test(str);
+                        if (
+                          values.type !== 'NUMERIC' &&
+                          isLetters(event.target.value)
+                        ) {
+                          return onChange(event.target.value);
+                        }
 
-                      if (values.type === 'NUMERIC') {
-                        return onChange(event.target.value);
-                      }
-                    }}
-                    value={value ?? ''}
-                    variant="outlined"
-                  />
-                )}
-                name="size"
-              />
+                        if (values.type === 'NUMERIC') {
+                          return onChange(event.target.value);
+                        }
+                      }}
+                      value={value ?? ''}
+                      variant="outlined"
+                    />
+                  )}
+                  name="size"
+                />
+              </Grid>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      helperText={error?.message || 'Descrição'}
+                      sx={{ width: '100%' }}
+                      id="outlined-multiline-static"
+                      label="Descrição"
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value ?? ''}
+                      multiline
+                      rows={6}
+                      name="description"
+                    />
+                  )}
+                  name="description"
+                />
+              </Grid>
             </Grid>
-
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    helperText={error?.message || 'Descrição'}
-                    sx={{ width: '100%' }}
-                    id="outlined-multiline-static"
-                    label="Descrição"
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value ?? ''}
-                    multiline
-                    rows={6}
-                    name="description"
-                  />
-                )}
-                name="description"
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
+          </CardContent>
+        )}
         <Divider />
         <Box
           sx={{
@@ -255,6 +257,6 @@ export const FormSize: FC<FormSize> = ({ pageTitle, sizeId }) => {
           </LoadingButton>
         </Box>
       </form>
-    </S.StyledCard>
+    </>
   );
 };

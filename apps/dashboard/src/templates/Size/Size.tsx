@@ -1,11 +1,9 @@
 import React, { FC, useState } from 'react';
-import { Paginated, Size } from 'interfaces/api';
 import { format, parseISO } from 'date-fns';
 import { useMutation, useQuery } from 'react-query';
 import { api } from 'services/api';
 import {
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   Table,
@@ -15,40 +13,32 @@ import {
   TableRow,
   Paper,
   TableBody,
-  Box,
   Stack,
   IconButton,
 } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 import Router from 'next/router';
 import { AxiosResponse } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as S from './FormSize.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
 import AddIcon from '@mui/icons-material/Add';
+import { PaginatedSize, SizeTemplateListProps } from './Size.interface';
+import { DialogControlProps } from 'components/CustomDialog/CustomDialog.interface';
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
 
-type SizeTemplateProps = {
-  data: Paginated<Size>;
-};
-
-type DialogProps = {
-  id?: string;
-  isOpen: boolean;
-};
-
-const SizeTemplate: FC<SizeTemplateProps> = ({ data }) => {
+const SizeTemplate: FC<SizeTemplateListProps> = ({ data }) => {
   const [page, setPage] = useState(0);
-  const [dialog, setDialog] = useState<DialogProps>({
+  const [dialog, setDialog] = useState<DialogControlProps>({
     isOpen: false,
   });
-  const [sizes, setSizes] = useState<Paginated<Size>>(data);
+  const [sizes, setSizes] = useState<PaginatedSize>(data);
   const { enqueueSnackbar } = useSnackbar();
 
   const { isLoading } = useQuery(
     ['sizes', page === 0 ? 1 : page + 1],
-    () => api.get(`sizes/?page=${page === 0 ? 1 : page + 1}`),
+    () => api.get(`sizes/paginate/?page=${page === 0 ? 1 : page + 1}`),
     {
       onSuccess: (res) => {
         setSizes(res.data);
@@ -107,37 +97,30 @@ const SizeTemplate: FC<SizeTemplateProps> = ({ data }) => {
   };
 
   return (
-    <S.StyledCard>
+    <>
       <CardHeader
-        subheader="Insira o tamanho e dimensões das roupas"
-        title="Tamanhos"
-        action={
-          <IconButton
-            aria-label="Adicionar novo tamanho"
-            onClick={() => Router.push('/sizes/create')}
-          >
-            <AddIcon />
-          </IconButton>
-        }
+        subHeader="Listagem de medidas inseridas"
+        title="Medidas"
+        label="Adicionar nova medida"
+        iconRight={<AddIcon />}
+        onClick={() => Router.push('/sizes/create')}
       />
       <Divider />
       {isLoading ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
+        <LoadingProgress />
       ) : (
         <CardContent>
-          <Grid container spacing={4}>
-            <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+          <Grid container>
+            <Paper
+              sx={{
+                width: '100%',
+                overflow: 'hidden',
+              }}
+            >
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Tamanho</TableCell>
+                    <TableCell>Medida</TableCell>
                     <TableCell>Tipo</TableCell>
                     <TableCell>Criado em</TableCell>
                     <TableCell>Ações</TableCell>
@@ -198,7 +181,7 @@ const SizeTemplate: FC<SizeTemplateProps> = ({ data }) => {
           />
         </CardContent>
       )}
-    </S.StyledCard>
+    </>
   );
 };
 
