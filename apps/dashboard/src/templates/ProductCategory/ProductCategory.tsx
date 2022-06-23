@@ -114,7 +114,6 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateListProps> = ({
         iconRight={<AddIcon />}
         onClick={() => Router.push('/product-categories/create')}
       />
-
       <Divider />
       {isLoading ? (
         <LoadingProgress />

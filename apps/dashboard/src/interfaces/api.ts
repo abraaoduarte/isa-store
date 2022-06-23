@@ -44,8 +44,16 @@ export interface Product {
   description: string;
   price: number;
   image: string;
+  brand_id: string;
+  product_category_id: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProductVariation {
+  size_id: string;
+  color_id: string;
+  quantity: number;
 }
 
 export interface Paginated<T> {

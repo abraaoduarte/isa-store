@@ -4,9 +4,9 @@ import { QueryClient } from 'react-query';
 import { api } from 'services/api';
 import Base from 'templates/Base';
 import { FormProduct } from 'templates/Product';
-import { ProductTemplateProps } from 'templates/Product/Product.interface';
+import { FormProductTemplateProps } from 'templates/Product/Product.interface';
 
-export default function Index(props: ProductTemplateProps) {
+export default function Index(props: FormProductTemplateProps) {
   return (
     <Base>
       <FormProduct {...props} pageTitle="Atualizar produto" />
