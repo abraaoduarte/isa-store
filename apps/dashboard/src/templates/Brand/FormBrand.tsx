@@ -36,7 +36,7 @@ export const FormBrand: FC<FormBrandTemplateProps> = ({
   const {
     control,
     handleSubmit,
-    setValue,
+    reset,
     formState: { errors },
   } = useForm<BrandFormValues>({
     resolver: yupResolver(schema),
@@ -57,11 +57,9 @@ export const FormBrand: FC<FormBrandTemplateProps> = ({
 
   useEffect(() => {
     if (brandId && isSuccess) {
-      setValue('name', data?.data?.result?.name);
-      setValue('description', data?.data?.result?.description);
+      reset(data?.data?.result);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandId, data]);
+  }, [brandId, data, isSuccess, reset]);
 
   const onSubmit = (data: BrandFormValues) => {
     brandId

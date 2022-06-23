@@ -62,6 +62,7 @@ export const FormSize: FC<FormSizeTemplateProps> = ({ pageTitle, sizeId }) => {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<SizeFormValues>({
     resolver: yupResolver(schema),
@@ -81,12 +82,9 @@ export const FormSize: FC<FormSizeTemplateProps> = ({ pageTitle, sizeId }) => {
 
   useEffect(() => {
     if (sizeId && isSuccess) {
-      setValue('type', data?.data?.result?.type);
-      setValue('size', data?.data?.result?.size);
-      setValue('description', data?.data?.result?.description);
+      reset(data?.data?.result);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sizeId, data]);
+  }, [sizeId, data, reset, isSuccess]);
 
   const onSubmit = (data: SizeFormValues) => {
     sizeId
@@ -145,7 +143,6 @@ export const FormSize: FC<FormSizeTemplateProps> = ({ pageTitle, sizeId }) => {
                           name="type"
                           onBlur={onBlur}
                           onChange={(value) => {
-                            console.log('value', value);
                             setValue('size', '');
                             onChange(value);
                           }}
