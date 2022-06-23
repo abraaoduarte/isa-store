@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
@@ -8,9 +9,14 @@ import { ColorTemplateListProps } from 'templates/Color/Color.interface';
 
 export default function Index(props: ColorTemplateListProps) {
   return (
-    <Base>
-      <ColorTemplate data={props.data} />
-    </Base>
+    <>
+      <Head>
+        <title>Cores - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <ColorTemplate data={props.data} />
+      </Base>
+    </>
   );
 }
 

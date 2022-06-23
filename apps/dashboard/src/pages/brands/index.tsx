@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
@@ -8,9 +9,14 @@ import { BrandTemplateProps } from 'templates/Brand/Brand.interface';
 
 export default function Index(props: BrandTemplateProps) {
   return (
-    <Base>
-      <BrandTemplate data={props.data} />
-    </Base>
+    <>
+      <Head>
+        <title>Marcas - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <BrandTemplate data={props.data} />
+      </Base>
+    </>
   );
 }
 

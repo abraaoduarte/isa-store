@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormColor } from 'templates/Color';
@@ -6,9 +7,14 @@ import { FormColorTemplateProps } from 'templates/Color/Color.interface';
 
 export default function SizeUpdate(props: FormColorTemplateProps) {
   return (
-    <Base>
-      <FormColor {...props} pageTitle="Atualize o nome da cor" />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar cor - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormColor {...props} pageTitle="Atualize o nome da cor" />
+      </Base>
+    </>
   );
 }
 

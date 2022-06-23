@@ -1,13 +1,19 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormColor } from 'templates/Color';
 
 export default function Index() {
   return (
-    <Base>
-      <FormColor pageTitle="Adicionar uma nova Cor" />
-    </Base>
+    <>
+      <Head>
+        <title>Inserir nova cor - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormColor pageTitle="Adicionar uma nova Cor" />
+      </Base>
+    </>
   );
 }
 

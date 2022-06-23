@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
@@ -8,9 +9,14 @@ import { SizeTemplateListProps } from 'templates/Size/Size.interface';
 
 export default function Index(props: SizeTemplateListProps) {
   return (
-    <Base>
-      <SizeTemplate data={props.data} />
-    </Base>
+    <>
+      <Head>
+        <title>Medidas - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <SizeTemplate data={props.data} />
+      </Base>
+    </>
   );
 }
 

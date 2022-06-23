@@ -1,13 +1,19 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormSize } from 'templates/Size';
 
 export default function Index() {
   return (
-    <Base>
-      <FormSize pageTitle="Adicionar Medida" />
-    </Base>
+    <>
+      <Head>
+        <title>Inserir nova medida - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormSize pageTitle="Adicionar Medida" />
+      </Base>
+    </>
   );
 }
 

@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormProductCategory } from 'templates/ProductCategory';
@@ -8,9 +9,14 @@ export default function ProductCategoryUpdate(
   props: FormProductCategoryTemplateProps,
 ) {
   return (
-    <Base>
-      <FormProductCategory {...props} pageTitle="Atualize a categoria" />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar categoria - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormProductCategory {...props} pageTitle="Atualize a categoria" />
+      </Base>
+    </>
   );
 }
 

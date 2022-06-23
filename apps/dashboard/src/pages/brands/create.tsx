@@ -1,13 +1,19 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormBrand } from 'templates/Brand';
 
 export default function Index() {
   return (
-    <Base>
-      <FormBrand pageTitle="Adicionar marca" />
-    </Base>
+    <>
+      <Head>
+        <title>Inserir nova marca - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormBrand pageTitle="Adicionar marca" />
+      </Base>
+    </>
   );
 }
 

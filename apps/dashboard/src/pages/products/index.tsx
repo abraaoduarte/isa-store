@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
@@ -8,9 +9,14 @@ import { ProductTemplateListProps } from 'templates/Product/Product.interface';
 
 export default function Index(props: ProductTemplateListProps) {
   return (
-    <Base>
-      <ProductTemplate data={props.data} />
-    </Base>
+    <>
+      <Head>
+        <title>Produtos - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <ProductTemplate data={props.data} />
+      </Base>
+    </>
   );
 }
 

@@ -1,4 +1,5 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormBrand } from 'templates/Brand';
@@ -6,9 +7,14 @@ import { FormBrandTemplateProps } from 'templates/Brand/Brand.interface';
 
 export default function ProductCategoryUpdate(props: FormBrandTemplateProps) {
   return (
-    <Base>
-      <FormBrand {...props} pageTitle="Atualize a marca" />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar marca - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormBrand {...props} pageTitle="Atualize a marca" />
+      </Base>
+    </>
   );
 }
 
