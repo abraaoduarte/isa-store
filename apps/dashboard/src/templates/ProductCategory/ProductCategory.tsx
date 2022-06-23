@@ -5,7 +5,6 @@ import { useMutation, useQuery } from 'react-query';
 import { api } from 'services/api';
 import {
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   Table,
@@ -15,35 +14,27 @@ import {
   TableRow,
   Paper,
   TableBody,
-  Box,
   Stack,
   IconButton,
   Typography,
 } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 import Router from 'next/router';
 import { AxiosResponse } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as S from './FormProductCategory.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
 import AddIcon from '@mui/icons-material/Add';
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
+import { DialogControlProps } from 'components/CustomDialog/CustomDialog.interface';
+import { ProductCategoryTemplateListProps } from './ProductCategory.interface';
 
-type ProductCategoryTemplateProps = {
-  data: Paginated<ProductCategory>;
-};
-
-type DialogProps = {
-  id?: string;
-  isOpen: boolean;
-};
-
-const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
+const ProductCategoryTemplate: FC<ProductCategoryTemplateListProps> = ({
   data,
 }) => {
   const [page, setPage] = useState(0);
-  const [dialog, setDialog] = useState<DialogProps>({
+  const [dialog, setDialog] = useState<DialogControlProps>({
     isOpen: false,
   });
   const [ProductCategories, setProductCategories] =
@@ -52,7 +43,8 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
 
   const { isLoading } = useQuery(
     ['productCategories', page === 0 ? 1 : page + 1],
-    () => api.get(`product-categories/?page=${page === 0 ? 1 : page + 1}`),
+    () =>
+      api.get(`product-categories/paginate/?page=${page === 0 ? 1 : page + 1}`),
     {
       onSuccess: (res) => {
         setProductCategories(res.data);
@@ -114,32 +106,21 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
   };
 
   return (
-    <S.StyledCard>
+    <>
       <CardHeader
-        subheader="Insira uma nova categoria"
+        subHeader="Listagem de categorias"
         title="Categorias"
-        action={
-          <IconButton
-            aria-label="Adicionar nova categoria"
-            onClick={() => Router.push('/product-categories/create')}
-          >
-            <AddIcon />
-          </IconButton>
-        }
+        label="Adicionar uma nova categoria"
+        iconRight={<AddIcon />}
+        onClick={() => Router.push('/product-categories/create')}
       />
+
       <Divider />
       {isLoading ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
+        <LoadingProgress />
       ) : (
         <CardContent>
-          <Grid container spacing={4}>
+          <Grid container>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               {ProductCategories.result.length > 0 ? (
                 <>
@@ -233,7 +214,7 @@ const ProductCategoryTemplate: FC<ProductCategoryTemplateProps> = ({
           />
         </CardContent>
       )}
-    </S.StyledCard>
+    </>
   );
 };
 

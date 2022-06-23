@@ -6,7 +6,7 @@ import { FormProductCategory } from 'templates/ProductCategory';
 export default function Index() {
   return (
     <Base>
-      <FormProductCategory pageTitle="Adicionar categoria" />
+      <FormProductCategory pageTitle="Adicionar uma nova categoria" />
     </Base>
   );
 }

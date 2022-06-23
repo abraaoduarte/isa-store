@@ -113,7 +113,7 @@ const Color: FC<ColorTemplateListProps> = ({ data }) => {
         <LoadingProgress />
       ) : (
         <CardContent>
-          <Grid container spacing={4}>
+          <Grid container>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               {color.result.length > 0 ? (
                 <>

@@ -1,22 +1,15 @@
 import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
-
 import Base from 'templates/Base';
 import { FormProductCategory } from 'templates/ProductCategory';
-
-type ProductCategoryUpdateProps = {
-  id: string;
-};
+import { FormProductCategoryTemplateProps } from 'templates/ProductCategory/ProductCategory.interface';
 
 export default function ProductCategoryUpdate(
-  props: ProductCategoryUpdateProps,
+  props: FormProductCategoryTemplateProps,
 ) {
   return (
     <Base>
-      <FormProductCategory
-        pageTitle="Atualize a categoria"
-        productCategoryId={props.id}
-      />
+      <FormProductCategory {...props} pageTitle="Atualize a categoria" />
     </Base>
   );
 }
@@ -37,7 +30,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   return {
     props: {
-      id,
+      productCategoryId: id,
     },
   };
 };

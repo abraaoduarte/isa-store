@@ -31,7 +31,7 @@ export const FormColor: FC<FormColorTemplateProps> = ({
   pageTitle,
   colorId,
 }) => {
-  const { data, isSuccess } = useQuery(
+  const { data, isSuccess, isError } = useQuery(
     ['color', colorId],
     () => api.get(`colors/${colorId}`),
     {
@@ -90,6 +90,10 @@ export const FormColor: FC<FormColorTemplateProps> = ({
           },
         });
   };
+
+  if (isError) {
+    Router.push('/404');
+  }
 
   return (
     <>
