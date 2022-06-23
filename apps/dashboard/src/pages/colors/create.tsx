@@ -6,7 +6,7 @@ import { FormColor } from 'templates/Color';
 export default function Index() {
   return (
     <Base>
-      <FormColor pageTitle="Adicionar Cor" />
+      <FormColor pageTitle="Adicionar uma nova Cor" />
     </Base>
   );
 }
