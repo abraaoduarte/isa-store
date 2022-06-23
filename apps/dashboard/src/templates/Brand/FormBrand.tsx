@@ -92,7 +92,7 @@ export const FormBrand: FC<FormBrandTemplateProps> = ({
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subHeader="Insira a marca" title={pageTitle} />
+        <CardHeader title="Marcas" subHeader={pageTitle} />
         <Divider />
         {brandId && !isSuccess ? (
           <LoadingProgress />

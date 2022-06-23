@@ -117,7 +117,7 @@ export const FormSize: FC<FormSizeTemplateProps> = ({ pageTitle, sizeId }) => {
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subHeader="Insira a medida da roupa" title={pageTitle} />
+        <CardHeader title="Medidas" subHeader={pageTitle} />
         <Divider />
         {sizeId && !isSuccess ? (
           <LoadingProgress />

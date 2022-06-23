@@ -1,12 +1,5 @@
 import { FC, useEffect } from 'react';
-import {
-  Box,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  TextField,
-} from '@mui/material';
+import { Box, CardContent, Divider, Grid, TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -20,6 +13,7 @@ import { api } from 'services/api';
 import { AxiosResponse } from 'axios';
 import { ColorFormValues, FormColorTemplateProps } from './Color.interface';
 import LoadingProgress from 'components/LoadingProgress';
+import CardHeader from 'components/CardHeader';
 
 const schema = yup
   .object({
@@ -98,7 +92,7 @@ export const FormColor: FC<FormColorTemplateProps> = ({
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subheader="Insira a cor" title={pageTitle} />
+        <CardHeader title="Cores" subHeader={pageTitle} />
         <Divider />
         {colorId && !isSuccess ? (
           <LoadingProgress />

@@ -7,7 +7,7 @@ import { FormSizeTemplateProps } from 'templates/Size/Size.interface';
 export default function SizeUpdate(props: FormSizeTemplateProps) {
   return (
     <Base>
-      <FormSize {...props} pageTitle="Atualize o tamanho" />
+      <FormSize {...props} pageTitle="Atualize a medida" />
     </Base>
   );
 }
