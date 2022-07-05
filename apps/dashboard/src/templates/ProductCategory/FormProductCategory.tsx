@@ -1,12 +1,5 @@
 import { FC, useEffect } from 'react';
-import {
-  Box,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  TextField,
-} from '@mui/material';
+import { Box, CardContent, Divider, Grid, TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -18,13 +11,12 @@ import { isEmpty } from 'ramda';
 import yup from 'utils/yup';
 import { api } from 'services/api';
 import { AxiosResponse } from 'axios';
-import * as S from './FormProductCategory.styles';
-
-type ProductCategoryDataProps = {
-  name: string;
-  type: string;
-  description?: string;
-};
+import {
+  FormProductCategoryTemplateProps,
+  ProductCategoryFormValues,
+} from './ProductCategory.interface';
+import LoadingProgress from 'components/LoadingProgress';
+import CardHeader from 'components/CardHeader';
 
 const schema = yup
   .object({
@@ -32,16 +24,11 @@ const schema = yup
   })
   .required();
 
-type FormProductCategory = {
-  pageTitle: string;
-  productCategoryId?: string;
-};
-
-export const FormProductCategory: FC<FormProductCategory> = ({
+export const FormProductCategory: FC<FormProductCategoryTemplateProps> = ({
   pageTitle,
   productCategoryId,
 }) => {
-  const { data, isSuccess } = useQuery(
+  const { data, isSuccess, isError } = useQuery(
     ['productCategory', productCategoryId],
     () => api.get(`product-categories/${productCategoryId}`),
     {
@@ -52,9 +39,9 @@ export const FormProductCategory: FC<FormProductCategory> = ({
   const {
     control,
     handleSubmit,
-    setValue,
+    reset,
     formState: { errors },
-  } = useForm<ProductCategoryDataProps>({
+  } = useForm<ProductCategoryFormValues>({
     resolver: yupResolver(schema),
   });
 
@@ -63,26 +50,24 @@ export const FormProductCategory: FC<FormProductCategory> = ({
   const addProductCategory = useMutation<
     AxiosResponse,
     Error,
-    ProductCategoryDataProps,
+    ProductCategoryFormValues,
     unknown
   >((data) => api.post('/product-categories', data));
 
   const updateProductCategory = useMutation<
     AxiosResponse,
     Error,
-    ProductCategoryDataProps,
+    ProductCategoryFormValues,
     unknown
   >((data) => api.patch(`/product-categories/${productCategoryId}`, data));
 
   useEffect(() => {
     if (productCategoryId && isSuccess) {
-      setValue('name', data?.data?.result?.name);
-      setValue('description', data?.data?.result?.description);
+      reset(data?.data?.result);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productCategoryId, data]);
+  }, [productCategoryId, data, reset, isSuccess]);
 
-  const onSubmit = (data: ProductCategoryDataProps) => {
+  const onSubmit = (data: ProductCategoryFormValues) => {
     productCategoryId
       ? updateProductCategory.mutate(data, {
           onSuccess: () => {
@@ -106,67 +91,71 @@ export const FormProductCategory: FC<FormProductCategory> = ({
         });
   };
 
-  if ((!isSuccess && !productCategoryId) || (productCategoryId && !isSuccess)) {
-    // Router.push('/404');
+  if (isError) {
+    Router.push('/404');
   }
 
   return (
-    <S.StyledCard>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subheader="Insira a categoria" title={pageTitle} />
+        <CardHeader title="Categorias" subHeader={pageTitle} />
         <Divider />
-        <CardContent>
-          <Grid container spacing={4}>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    autoComplete="false"
-                    helperText={error?.message || 'Nome da categoria'}
-                    label="Cateogria"
-                    name="name"
-                    onBlur={onBlur}
-                    type="text"
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  />
-                )}
-                name="name"
-              />
+        {productCategoryId && !isSuccess ? (
+          <LoadingProgress />
+        ) : (
+          <CardContent>
+            <Grid container spacing={4}>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      fullWidth
+                      autoComplete="false"
+                      helperText={error?.message || 'Nome da categoria'}
+                      label="Cateogria"
+                      name="name"
+                      onBlur={onBlur}
+                      type="text"
+                      onChange={onChange}
+                      value={value ?? ''}
+                      variant="outlined"
+                    />
+                  )}
+                  name="name"
+                />
+              </Grid>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      helperText={error?.message || 'Descrição'}
+                      sx={{ width: '100%' }}
+                      id="outlined-multiline-static"
+                      label="Descrição"
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value ?? ''}
+                      multiline
+                      rows={6}
+                      name="description"
+                    />
+                  )}
+                  name="description"
+                />
+              </Grid>
             </Grid>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    helperText={error?.message || 'Descrição'}
-                    sx={{ width: '100%' }}
-                    id="outlined-multiline-static"
-                    label="Descrição"
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value ?? ''}
-                    multiline
-                    rows={6}
-                    name="description"
-                  />
-                )}
-                name="description"
-              />
-            </Grid>
-          </Grid>
-        </CardContent>
+          </CardContent>
+        )}
         <Divider />
         <Box
           sx={{
@@ -190,6 +179,6 @@ export const FormProductCategory: FC<FormProductCategory> = ({
           </LoadingButton>
         </Box>
       </form>
-    </S.StyledCard>
+    </>
   );
 };

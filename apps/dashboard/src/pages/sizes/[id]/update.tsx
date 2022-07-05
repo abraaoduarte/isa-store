@@ -1,18 +1,20 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
-
 import Base from 'templates/Base';
 import { FormSize } from 'templates/Size';
+import { FormSizeTemplateProps } from 'templates/Size/Size.interface';
 
-type SizeUpdateProps = {
-  id: string;
-};
-
-export default function SizeUpdate(props: SizeUpdateProps) {
+export default function SizeUpdate(props: FormSizeTemplateProps) {
   return (
-    <Base>
-      <FormSize pageTitle="Atualize o tamanho" sizeId={props.id} />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar medida - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormSize {...props} pageTitle="Atualize a medida" />
+      </Base>
+    </>
   );
 }
 
@@ -30,27 +32,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const id = ctx.params?.id;
 
-  // const queryClient = new QueryClient();
-
-  // await queryClient.prefetchQuery(
-  //   ['size', id],
-  //   () =>
-  //     api
-  //       .get(`sizes/${id}`, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       })
-  //       .then((result) => result.data),
-  //   {
-  //     staleTime: 1000,
-  //   },
-  // );
-
   return {
     props: {
-      id,
-      // size: dehydrate(queryClient),
+      sizeId: id,
     },
   };
 };

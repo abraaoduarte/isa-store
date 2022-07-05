@@ -1,18 +1,20 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
-
 import Base from 'templates/Base';
 import { FormColor } from 'templates/Color';
+import { FormColorTemplateProps } from 'templates/Color/Color.interface';
 
-type SizeUpdateProps = {
-  id: string;
-};
-
-export default function SizeUpdate(props: SizeUpdateProps) {
+export default function SizeUpdate(props: FormColorTemplateProps) {
   return (
-    <Base>
-      <FormColor pageTitle="Atualize a cor" colorId={props.id} />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar cor - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormColor {...props} pageTitle="Atualize o nome da cor" />
+      </Base>
+    </>
   );
 }
 
@@ -30,27 +32,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const id = ctx.params?.id;
 
-  // const queryClient = new QueryClient();
-
-  // await queryClient.prefetchQuery(
-  //   ['size', id],
-  //   () =>
-  //     api
-  //       .get(`sizes/${id}`, {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       })
-  //       .then((result) => result.data),
-  //   {
-  //     staleTime: 1000,
-  //   },
-  // );
-
   return {
     props: {
-      id,
-      // size: dehydrate(queryClient),
+      colorId: id,
     },
   };
 };

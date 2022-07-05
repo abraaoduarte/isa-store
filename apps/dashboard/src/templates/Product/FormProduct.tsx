@@ -1,8 +1,7 @@
-import { FC, forwardRef, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import {
   Box,
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   TextField,
@@ -17,7 +16,6 @@ import {
   Stack,
 } from '@mui/material';
 import { Controller, useForm, useFieldArray } from 'react-hook-form';
-import NumberFormat, { InputAttributes } from 'react-number-format';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQuery } from 'react-query';
@@ -30,31 +28,15 @@ import { isEmpty, omit } from 'ramda';
 import yup from 'utils/yup';
 import { api } from 'services/api';
 import { AxiosResponse } from 'axios';
-import { ProductTemplateProps } from './Product.interface';
-import * as S from './FormProduct.styles';
-
-type ProductVariationProps = {
-  size: string;
-  color: string;
-  quantity: number;
-};
-
-type ProductVariationApiProps = {
-  size_id: string;
-  color_id: string;
-  quantity: number;
-};
-
-type ProductDataProps = {
-  name: string;
-  brand: string;
-  price: number;
-  discount: number;
-  quantity: number;
-  category: string;
-  description?: string;
-  productVariation: ProductVariationProps[];
-};
+import {
+  ProductFormValues,
+  FormProductTemplateProps,
+} from './Product.interface';
+import NumberFormatCustom from 'components/NumberField/NumberField';
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
+import { ProductVariation } from 'interfaces/api';
+import { formatNumberToMoney } from 'utils/formatNumberToMoney';
 
 const schema = yup
   .object({
@@ -77,36 +59,7 @@ const schema = yup
   })
   .required();
 
-interface CustomProps {
-  onChange: (event: { target: { name: string; value: string } }) => void;
-  name: string;
-}
-const NumberFormatCustom = forwardRef<
-  NumberFormat<InputAttributes>,
-  CustomProps
->(function NumberFormatCustom(props, ref) {
-  const { onChange, ...other } = props;
-
-  return (
-    <NumberFormat
-      {...other}
-      getInputRef={ref}
-      onValueChange={(values) => {
-        onChange({
-          target: {
-            name: props.name,
-            value: values.value,
-          },
-        });
-      }}
-      decimalSeparator=","
-      thousandSeparator="."
-      isNumericString
-    />
-  );
-});
-
-export const FormProduct: FC<ProductTemplateProps> = ({
+export const FormProduct: FC<FormProductTemplateProps> = ({
   pageTitle,
   productId,
   brands,
@@ -136,7 +89,8 @@ export const FormProduct: FC<ProductTemplateProps> = ({
     setValue,
     formState: { errors },
     watch,
-  } = useForm<ProductDataProps>({
+    reset,
+  } = useForm<ProductFormValues>({
     resolver: yupResolver(schema),
   });
 
@@ -153,34 +107,36 @@ export const FormProduct: FC<ProductTemplateProps> = ({
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const addBrand = useMutation<AxiosResponse, Error, ProductDataProps, unknown>(
-    (data) => {
-      const normalizeData = {
-        ...omit(['price', 'category', 'brand'], data),
-        price: String(data.price).replace('.', ''),
-        product_category_id: data.category,
-        brand_id: data.brand,
-        productVariation: data.productVariation.map((variation) => ({
-          ...omit(['size', 'color'], variation),
-          size_id: variation.size,
-          color_id: variation.color,
-        })),
-      };
-
-      console.log('normalizeData', normalizeData);
-      return api.post('/products', normalizeData);
-    },
-  );
-
-  const updateBrand = useMutation<
+  const addBrand = useMutation<
     AxiosResponse,
     Error,
-    ProductDataProps,
+    ProductFormValues,
     unknown
   >((data) => {
     const normalizeData = {
       ...omit(['price', 'category', 'brand'], data),
-      price: String(data.price).replace('.', ''),
+      price: String(data.price).replace('.', '').replace(',', ''),
+      product_category_id: data.category,
+      brand_id: data.brand,
+      productVariation: data.productVariation.map((variation) => ({
+        ...omit(['size', 'color'], variation),
+        size_id: variation.size,
+        color_id: variation.color,
+      })),
+    };
+
+    return api.post('/products', normalizeData);
+  });
+
+  const updateBrand = useMutation<
+    AxiosResponse,
+    Error,
+    ProductFormValues,
+    unknown
+  >((data) => {
+    const normalizeData = {
+      ...omit(['price', 'category', 'brand'], data),
+      price: String(data.price).replace('.', '').replace(',', ''),
       product_category_id: data.category,
       brand_id: data.brand,
       productVariation: data.productVariation.map((variation) => ({
@@ -193,30 +149,24 @@ export const FormProduct: FC<ProductTemplateProps> = ({
   });
 
   useEffect(() => {
-    console.log('data', data);
-    console.log('productId', productId);
     if (productId && isSuccess) {
-      setValue('name', data?.data?.result?.name);
-      setValue('description', data?.data?.result?.description);
-      setValue('price', data?.data?.result?.price);
-      setValue('discount', data?.data?.result?.discount);
-      setValue('quantity', data?.data?.result?.quantity);
-      setValue('brand', data?.data?.result?.brand_id);
-      setValue('category', data?.data?.result?.product_category_id);
-      append(
-        data?.data?.result?.productVariation.map(
-          (variation: ProductVariationApiProps) => ({
+      reset({
+        ...data?.data?.result,
+        price: formatNumberToMoney(data?.data?.result.price).replace('.', ''),
+        brand: data?.data?.result.brand_id,
+        category: data?.data?.result.product_category_id,
+        productVariation: data?.data?.result?.productVariation.map(
+          (variation: ProductVariation) => ({
             quantity: variation.quantity,
             color: variation.color_id,
             size: variation.size_id,
           }),
         ),
-      );
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId, data]);
+  }, [productId, data, reset, isSuccess]);
 
-  const onSubmit = (data: ProductDataProps) => {
+  const onSubmit = (data: ProductFormValues) => {
     productId
       ? updateBrand.mutate(data, {
           onSuccess: () => {
@@ -241,358 +191,362 @@ export const FormProduct: FC<ProductTemplateProps> = ({
   };
 
   return (
-    <S.StyledCard>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subheader="Insira um novo produto" title={pageTitle} />
+        <CardHeader title="Produtos" subHeader={pageTitle} />
         <Divider />
-        <CardContent>
-          <Grid container spacing={4}>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    autoComplete="false"
-                    helperText={error?.message}
-                    label="Nome"
-                    name="name"
-                    onBlur={onBlur}
-                    type="text"
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  />
-                )}
-                name="name"
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <FormControl fullWidth>
-                    <InputLabel
+        {productId && !isSuccess ? (
+          <LoadingProgress />
+        ) : (
+          <CardContent>
+            <Grid container spacing={4}>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
                       error={!!error}
-                      htmlFor="outlined-adornment-amount"
-                    >
-                      Preço
-                    </InputLabel>
-                    <OutlinedInput
-                      error={!!error}
-                      onBlur={onBlur}
                       fullWidth
                       autoComplete="false"
-                      id="outlined-adornment-amount"
-                      value={value}
+                      helperText={error?.message}
+                      label="Nome"
+                      name="name"
+                      onBlur={onBlur}
+                      type="text"
                       onChange={onChange}
-                      startAdornment={
-                        <InputAdornment position="start">R$</InputAdornment>
-                      }
-                      label="Preço"
-                      inputComponent={NumberFormatCustom as any}
-                    />
-
-                    <FormHelperText
-                      error={!!error}
-                      color={error?.message && 'error'}
-                    >
-                      {error?.message}
-                    </FormHelperText>
-                  </FormControl>
-                )}
-                name="price"
-              />
-            </Grid>
-            <Grid item md={5} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <FormControl fullWidth>
-                    <InputLabel
-                      error={!!error}
-                      htmlFor="outlined-adornment-amount"
-                    >
-                      Desconto
-                    </InputLabel>
-                    <OutlinedInput
-                      error={!!error}
-                      onBlur={onBlur}
-                      fullWidth
-                      autoComplete="false"
-                      type="number"
-                      id="outlined-adornment-amount"
                       value={value ?? ''}
-                      onChange={onChange}
-                      startAdornment={
-                        <InputAdornment position="start">%</InputAdornment>
-                      }
-                      label="Desconto"
+                      variant="outlined"
                     />
-                    <FormHelperText
-                      error={!!error}
-                      color={error?.message && 'error'}
-                    >
-                      {error?.message}
-                    </FormHelperText>
-                  </FormControl>
-                )}
-                name="discount"
-              />
-            </Grid>
-            <Grid item md={2} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    disabled
-                    autoComplete="false"
-                    helperText={error?.message}
-                    label="Quantidade"
-                    name="quantity"
-                    onBlur={onBlur}
-                    type="number"
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  />
-                )}
-                name="quantity"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    select
-                    fullWidth
-                    autoComplete="false"
-                    helperText={error?.message}
-                    label="Marca"
-                    name="brand"
-                    onBlur={onBlur}
-                    type="text"
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  >
-                    {brands.map((brand) => (
-                      <MenuItem key={brand.id} value={brand.id}>
-                        {brand.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-                name="brand"
-              />
-            </Grid>
-            <Grid item md={6} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    select
-                    fullWidth
-                    autoComplete="false"
-                    helperText={error?.message}
-                    label="Categoria"
-                    name="category"
-                    onBlur={onBlur}
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  >
-                    {categories.map((brand) => (
-                      <MenuItem key={brand.id} value={brand.id}>
-                        {brand.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-                name="category"
-              />
-            </Grid>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    helperText={error?.message || 'Descrição'}
-                    sx={{ width: '100%' }}
-                    id="outlined-multiline-static"
-                    label="Descrição"
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value ?? ''}
-                    multiline
-                    rows={4}
-                    name="description"
-                  />
-                )}
-                name="description"
-              />
-            </Grid>
-            <Grid item md={12} xs={12}>
-              <Button
-                startIcon={<AddIcon />}
-                onClick={handleAddFields}
-                sx={{ marginBottom: 2 }}
-              >
-                Adicionar
-              </Button>
-              {fields.map((field, index) => (
-                <Paper
-                  elevation={6}
-                  sx={{ padding: 3, marginBottom: 5 }}
-                  key={field.id}
-                >
-                  <Grid container spacing={3}>
-                    <Grid item md={4} xs={12}>
-                      <Controller
-                        control={control}
-                        key={field.id}
-                        render={({
-                          field: { onChange, onBlur, value },
-                          fieldState: { error },
-                        }) => (
-                          <TextField
-                            error={!!error}
-                            select
-                            fullWidth
-                            autoComplete="false"
-                            helperText={error?.message}
-                            label="Tamanho"
-                            name={`productVariation.${index}.size`}
-                            onBlur={onBlur}
-                            type="text"
-                            onChange={onChange}
-                            value={value ?? ''}
-                            variant="outlined"
-                          >
-                            {sizes.map((size) => (
-                              <MenuItem key={size.id} value={size.id}>
-                                {size.size}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        )}
-                        name={`productVariation.${index}.size`}
-                      />
-                    </Grid>
-                    <Grid item md={4} xs={12}>
-                      <Controller
-                        control={control}
-                        render={({
-                          field: { onChange, onBlur, value },
-                          fieldState: { error },
-                        }) => (
-                          <TextField
-                            error={!!error}
-                            select
-                            fullWidth
-                            autoComplete="false"
-                            helperText={error?.message}
-                            label="Cor"
-                            name={`productVariation.${index}.color`}
-                            onBlur={onBlur}
-                            type="text"
-                            onChange={onChange}
-                            value={value ?? ''}
-                            variant="outlined"
-                          >
-                            {colors.map((color) => (
-                              <MenuItem key={color.id} value={color.id}>
-                                {color.name}
-                              </MenuItem>
-                            ))}
-                          </TextField>
-                        )}
-                        name={`productVariation.${index}.color`}
-                      />
-                    </Grid>
-                    <Grid item md={4} xs={12}>
-                      <Controller
-                        control={control}
-                        render={({
-                          field: { onChange, onBlur, value },
-                          fieldState: { error },
-                        }) => (
-                          <TextField
-                            error={!!error}
-                            fullWidth
-                            autoComplete="false"
-                            helperText={error?.message}
-                            label="Quantidade"
-                            name={`productVariation.${index}.quantity`}
-                            onBlur={onBlur}
-                            type="number"
-                            onChange={onChange}
-                            value={value ?? ''}
-                            variant="outlined"
-                          />
-                        )}
-                        name={`productVariation.${index}.quantity`}
-                      />
-                    </Grid>
-
-                    <Grid item md={12} xs={12}>
-                      <Stack
-                        direction="row"
-                        justifyContent="flex-end"
-                        alignItems="center"
-                        spacing={1}
+                  )}
+                  name="name"
+                />
+              </Grid>
+              <Grid item md={5} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <FormControl fullWidth>
+                      <InputLabel
+                        error={!!error}
+                        htmlFor="outlined-adornment-amount"
                       >
-                        <Button
-                          size="small"
-                          color="error"
-                          variant="contained"
-                          onClick={() => remove(index)}
+                        Preço
+                      </InputLabel>
+                      <OutlinedInput
+                        error={!!error}
+                        onBlur={onBlur}
+                        fullWidth
+                        autoComplete="false"
+                        id="outlined-adornment-amount"
+                        value={value}
+                        onChange={onChange}
+                        startAdornment={
+                          <InputAdornment position="start">R$</InputAdornment>
+                        }
+                        label="Preço"
+                        inputComponent={NumberFormatCustom as any}
+                      />
+
+                      <FormHelperText
+                        error={!!error}
+                        color={error?.message && 'error'}
+                      >
+                        {error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                  name="price"
+                />
+              </Grid>
+              <Grid item md={5} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <FormControl fullWidth>
+                      <InputLabel
+                        error={!!error}
+                        htmlFor="outlined-adornment-amount"
+                      >
+                        Desconto
+                      </InputLabel>
+                      <OutlinedInput
+                        error={!!error}
+                        onBlur={onBlur}
+                        fullWidth
+                        autoComplete="false"
+                        type="number"
+                        id="outlined-adornment-amount"
+                        value={value ?? ''}
+                        onChange={onChange}
+                        startAdornment={
+                          <InputAdornment position="start">%</InputAdornment>
+                        }
+                        label="Desconto"
+                      />
+                      <FormHelperText
+                        error={!!error}
+                        color={error?.message && 'error'}
+                      >
+                        {error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                  name="discount"
+                />
+              </Grid>
+              <Grid item md={2} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      fullWidth
+                      disabled
+                      autoComplete="false"
+                      helperText={error?.message}
+                      label="Quantidade"
+                      name="quantity"
+                      onBlur={onBlur}
+                      type="number"
+                      onChange={onChange}
+                      value={value ?? ''}
+                      variant="outlined"
+                    />
+                  )}
+                  name="quantity"
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      select
+                      fullWidth
+                      autoComplete="false"
+                      helperText={error?.message}
+                      label="Marca"
+                      name="brand"
+                      onBlur={onBlur}
+                      type="text"
+                      onChange={onChange}
+                      value={value ?? ''}
+                      variant="outlined"
+                    >
+                      {brands.map((brand) => (
+                        <MenuItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                  name="brand"
+                />
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      select
+                      fullWidth
+                      autoComplete="false"
+                      helperText={error?.message}
+                      label="Categoria"
+                      name="category"
+                      onBlur={onBlur}
+                      onChange={onChange}
+                      value={value ?? ''}
+                      variant="outlined"
+                    >
+                      {categories.map((brand) => (
+                        <MenuItem key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                  name="category"
+                />
+              </Grid>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      helperText={error?.message || 'Descrição'}
+                      sx={{ width: '100%' }}
+                      id="outlined-multiline-static"
+                      label="Descrição"
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value ?? ''}
+                      multiline
+                      rows={4}
+                      name="description"
+                    />
+                  )}
+                  name="description"
+                />
+              </Grid>
+              <Grid item md={12} xs={12}>
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={handleAddFields}
+                  sx={{ marginBottom: 2 }}
+                >
+                  Adicionar
+                </Button>
+                {fields.map((field, index) => (
+                  <Paper
+                    elevation={6}
+                    sx={{ padding: 3, marginBottom: 5 }}
+                    key={field.id}
+                  >
+                    <Grid container spacing={3}>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          key={field.id}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <TextField
+                              error={!!error}
+                              select
+                              fullWidth
+                              autoComplete="false"
+                              helperText={error?.message}
+                              label="Tamanho"
+                              name={`productVariation.${index}.size`}
+                              onBlur={onBlur}
+                              type="text"
+                              onChange={onChange}
+                              value={value ?? ''}
+                              variant="outlined"
+                            >
+                              {sizes.map((size) => (
+                                <MenuItem key={size.id} value={size.id}>
+                                  {size.size}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          )}
+                          name={`productVariation.${index}.size`}
+                        />
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <TextField
+                              error={!!error}
+                              select
+                              fullWidth
+                              autoComplete="false"
+                              helperText={error?.message}
+                              label="Cor"
+                              name={`productVariation.${index}.color`}
+                              onBlur={onBlur}
+                              type="text"
+                              onChange={onChange}
+                              value={value ?? ''}
+                              variant="outlined"
+                            >
+                              {colors.map((color) => (
+                                <MenuItem key={color.id} value={color.id}>
+                                  {color.name}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          )}
+                          name={`productVariation.${index}.color`}
+                        />
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <TextField
+                              error={!!error}
+                              fullWidth
+                              autoComplete="false"
+                              helperText={error?.message}
+                              label="Quantidade"
+                              name={`productVariation.${index}.quantity`}
+                              onBlur={onBlur}
+                              type="number"
+                              onChange={onChange}
+                              value={value ?? ''}
+                              variant="outlined"
+                            />
+                          )}
+                          name={`productVariation.${index}.quantity`}
+                        />
+                      </Grid>
+
+                      <Grid item md={12} xs={12}>
+                        <Stack
+                          direction="row"
+                          justifyContent="flex-end"
+                          alignItems="center"
+                          spacing={1}
                         >
-                          <DeleteIcon />
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          onClick={handleAddFields}
-                        >
-                          <AddIcon />
-                        </Button>
-                      </Stack>
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="contained"
+                            onClick={() => remove(index)}
+                          >
+                            <DeleteIcon />
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={handleAddFields}
+                          >
+                            <AddIcon />
+                          </Button>
+                        </Stack>
+                      </Grid>
                     </Grid>
-                  </Grid>
-                </Paper>
-              ))}
+                  </Paper>
+                ))}
+              </Grid>
             </Grid>
-          </Grid>
-        </CardContent>
+          </CardContent>
+        )}
         <Divider />
         <Box
           sx={{
@@ -614,6 +568,6 @@ export const FormProduct: FC<ProductTemplateProps> = ({
           </LoadingButton>
         </Box>
       </form>
-    </S.StyledCard>
+    </>
   );
 };

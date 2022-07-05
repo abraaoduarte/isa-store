@@ -1,16 +1,22 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import { QueryClient } from 'react-query';
 import { api } from 'services/api';
 import Base from 'templates/Base';
 import { FormProduct } from 'templates/Product';
-import { ProductTemplateProps } from 'templates/Product/Product.interface';
+import { FormProductTemplateProps } from 'templates/Product/Product.interface';
 
-export default function Index(props: ProductTemplateProps) {
+export default function Index(props: FormProductTemplateProps) {
   return (
-    <Base>
-      <FormProduct {...props} pageTitle="Atualizar produto" />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar produto - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormProduct {...props} pageTitle="Atualizar produto" />
+      </Base>
+    </>
   );
 }
 

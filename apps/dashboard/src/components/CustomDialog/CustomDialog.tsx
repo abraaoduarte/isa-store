@@ -1,20 +1,11 @@
-import React, { FC, ReactNode } from 'react';
+import React, { FC } from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
-export type CustomDialogProps = {
-  open: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  message: string;
-  title: string;
-  cancel?: string;
-  confirm?: string;
-};
+import { CustomDialogProps } from './CustomDialog.interface';
 
 const CustomDialog: FC<CustomDialogProps> = ({
   open,

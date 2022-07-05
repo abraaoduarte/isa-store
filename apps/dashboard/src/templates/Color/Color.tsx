@@ -5,7 +5,6 @@ import { useMutation, useQuery } from 'react-query';
 import { api } from 'services/api';
 import {
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   Table,
@@ -15,33 +14,25 @@ import {
   TableRow,
   Paper,
   TableBody,
-  Box,
   Stack,
   IconButton,
   Typography,
 } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
 import Router from 'next/router';
 import { AxiosResponse } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as S from './Color.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
 import AddIcon from '@mui/icons-material/Add';
+import { DialogControlProps } from 'components/CustomDialog/CustomDialog.interface';
+import { ColorTemplateListProps } from './Color.interface';
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
 
-type ColorProps = {
-  data: Paginated<Color>;
-};
-
-type DialogProps = {
-  id?: string;
-  isOpen: boolean;
-};
-
-const Color: FC<ColorProps> = ({ data }) => {
+const Color: FC<ColorTemplateListProps> = ({ data }) => {
   const [page, setPage] = useState(0);
-  const [dialog, setDialog] = useState<DialogProps>({
+  const [dialog, setDialog] = useState<DialogControlProps>({
     isOpen: false,
   });
   const [color, setcolors] = useState<Paginated<Color>>(data);
@@ -49,7 +40,7 @@ const Color: FC<ColorProps> = ({ data }) => {
 
   const { isLoading } = useQuery(
     ['color', page === 0 ? 1 : page + 1],
-    () => api.get(`colors/?page=${page === 0 ? 1 : page + 1}`),
+    () => api.get(`colors/paginate/?page=${page === 0 ? 1 : page + 1}`),
     {
       onSuccess: (res) => {
         setcolors(res.data);
@@ -108,32 +99,21 @@ const Color: FC<ColorProps> = ({ data }) => {
   };
 
   return (
-    <S.StyledCard>
+    <>
       <CardHeader
-        subheader="Insira uma nova cor"
+        subHeader="Listagem de cores inseridas"
         title="Cores"
-        action={
-          <IconButton
-            aria-label="Adicionar nova cor"
-            onClick={() => Router.push('/colors/create')}
-          >
-            <AddIcon />
-          </IconButton>
-        }
+        label="Adicionar uma nova cor"
+        iconRight={<AddIcon />}
+        onClick={() => Router.push('/colors/create')}
       />
+
       <Divider />
       {isLoading ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
+        <LoadingProgress />
       ) : (
         <CardContent>
-          <Grid container spacing={4}>
+          <Grid container>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               {color.result.length > 0 ? (
                 <>
@@ -220,7 +200,7 @@ const Color: FC<ColorProps> = ({ data }) => {
           />
         </CardContent>
       )}
-    </S.StyledCard>
+    </>
   );
 };
 

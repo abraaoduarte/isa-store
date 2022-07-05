@@ -5,7 +5,6 @@ import { useMutation, useQuery } from 'react-query';
 import { api } from 'services/api';
 import {
   CardContent,
-  CardHeader,
   Divider,
   Grid,
   Table,
@@ -15,41 +14,26 @@ import {
   TableRow,
   Paper,
   TableBody,
-  Box,
   Stack,
   IconButton,
   Typography,
 } from '@mui/material';
-import { BRL } from '@dinero.js/currencies';
-import CircularProgress from '@mui/material/CircularProgress';
 import Router from 'next/router';
 import { AxiosResponse } from 'axios';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import * as S from './FormProduct.styles';
 import { useSnackbar } from 'notistack';
 import CustomDialog from 'components/CustomDialog';
 import AddIcon from '@mui/icons-material/Add';
-import { dinero, down, toUnit } from 'dinero.js';
+import CardHeader from 'components/CardHeader';
+import LoadingProgress from 'components/LoadingProgress';
+import { ProductTemplateListProps } from './Product.interface';
+import { DialogControlProps } from 'components/CustomDialog/CustomDialog.interface';
+import { formatNumberToMoney } from 'utils/formatNumberToMoney';
 
-type ProductTemplateProps = {
-  data: Paginated<Product>;
-};
-
-type DialogProps = {
-  id?: string;
-  isOpen: boolean;
-};
-
-const formatNumberToDecimal = (number: number) => {
-  const price = dinero({ amount: number, currency: BRL });
-  const priceDecimal: number = toUnit(price, { digits: 2, round: down });
-  return priceDecimal.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-};
-
-const ProductTemplate: FC<ProductTemplateProps> = ({ data }) => {
+const ProductTemplate: FC<ProductTemplateListProps> = ({ data }) => {
   const [page, setPage] = useState(0);
-  const [dialog, setDialog] = useState<DialogProps>({
+  const [dialog, setDialog] = useState<DialogControlProps>({
     isOpen: false,
   });
   const [products, setProducts] = useState<Paginated<Product>>(data);
@@ -118,32 +102,20 @@ const ProductTemplate: FC<ProductTemplateProps> = ({ data }) => {
   };
 
   return (
-    <S.StyledCard>
+    <>
       <CardHeader
-        subheader="Insira uma nova produto"
-        title="Marcas"
-        action={
-          <IconButton
-            aria-label="Adicionar nova produto"
-            onClick={() => Router.push('/products/create')}
-          >
-            <AddIcon />
-          </IconButton>
-        }
+        subHeader="Listagem de produtos"
+        title="Produtos"
+        label="Adicionar um novo produto"
+        iconRight={<AddIcon />}
+        onClick={() => Router.push('/products/create')}
       />
       <Divider />
       {isLoading ? (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <CircularProgress />
-        </Box>
+        <LoadingProgress />
       ) : (
         <CardContent>
-          <Grid container spacing={4}>
+          <Grid container>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
               {products.result.length > 0 ? (
                 <>
@@ -168,7 +140,7 @@ const ProductTemplate: FC<ProductTemplateProps> = ({ data }) => {
                           <TableCell>{product.name}</TableCell>
                           <TableCell>{product.description}</TableCell>
                           <TableCell>
-                            {formatNumberToDecimal(product.price)}
+                            {formatNumberToMoney(product.price)}
                           </TableCell>
                           <TableCell>
                             {format(parseISO(product.created_at), 'dd/MM/yyyy')}
@@ -238,7 +210,7 @@ const ProductTemplate: FC<ProductTemplateProps> = ({ data }) => {
           />
         </CardContent>
       )}
-    </S.StyledCard>
+    </>
   );
 };
 

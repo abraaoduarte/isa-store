@@ -1,18 +1,20 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
-
 import Base from 'templates/Base';
 import { FormBrand } from 'templates/Brand';
+import { FormBrandTemplateProps } from 'templates/Brand/Brand.interface';
 
-type BrandUpdateProps = {
-  id: string;
-};
-
-export default function ProductCategoryUpdate(props: BrandUpdateProps) {
+export default function ProductCategoryUpdate(props: FormBrandTemplateProps) {
   return (
-    <Base>
-      <FormBrand pageTitle="Atualize a marca" brandId={props.id} />
-    </Base>
+    <>
+      <Head>
+        <title>Atualizar marca - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormBrand {...props} pageTitle="Atualize a marca" />
+      </Base>
+    </>
   );
 }
 
@@ -32,7 +34,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   return {
     props: {
-      id,
+      brandId: id,
     },
   };
 };

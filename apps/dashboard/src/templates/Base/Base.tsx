@@ -2,7 +2,7 @@ import { FC, ReactNode, useState } from 'react';
 import { Box } from '@mui/material';
 import Navbar from 'components/Navbar';
 import Sidebar from 'components/Sidebar';
-import { Container } from './Base.styles';
+import * as S from './Base.styles';
 
 type BaseProps = {
   children: ReactNode;
@@ -13,7 +13,7 @@ const Base: FC<BaseProps> = ({ children }) => {
 
   return (
     <>
-      <Container>
+      <S.Container>
         <Box
           sx={{
             display: 'flex',
@@ -24,9 +24,9 @@ const Base: FC<BaseProps> = ({ children }) => {
             padding: '16px',
           }}
         >
-          {children}
+          <S.StyledCard>{children}</S.StyledCard>
         </Box>
-      </Container>
+      </S.Container>
       <Navbar onSidebarOpen={() => setSidebarOpen(true)} />
       <Sidebar onClose={() => setSidebarOpen(false)} isOpen={isSidebarOpen} />
     </>

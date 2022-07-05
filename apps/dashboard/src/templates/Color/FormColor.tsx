@@ -1,12 +1,5 @@
 import { FC, useEffect } from 'react';
-import {
-  Box,
-  CardContent,
-  CardHeader,
-  Divider,
-  Grid,
-  TextField,
-} from '@mui/material';
+import { Box, CardContent, Divider, Grid, TextField } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -18,13 +11,9 @@ import { isEmpty } from 'ramda';
 import yup from 'utils/yup';
 import { api } from 'services/api';
 import { AxiosResponse } from 'axios';
-import * as S from './Color.styles';
-
-type ColorDataProps = {
-  name: string;
-  type: string;
-  description?: string;
-};
+import { ColorFormValues, FormColorTemplateProps } from './Color.interface';
+import LoadingProgress from 'components/LoadingProgress';
+import CardHeader from 'components/CardHeader';
 
 const schema = yup
   .object({
@@ -32,13 +21,11 @@ const schema = yup
   })
   .required();
 
-type FormColorProps = {
-  pageTitle: string;
-  colorId?: string;
-};
-
-export const FormColor: FC<FormColorProps> = ({ pageTitle, colorId }) => {
-  const { data, isSuccess } = useQuery(
+export const FormColor: FC<FormColorTemplateProps> = ({
+  pageTitle,
+  colorId,
+}) => {
+  const { data, isSuccess, isError } = useQuery(
     ['color', colorId],
     () => api.get(`colors/${colorId}`),
     {
@@ -49,34 +36,32 @@ export const FormColor: FC<FormColorProps> = ({ pageTitle, colorId }) => {
   const {
     control,
     handleSubmit,
-    setValue,
+    reset,
     formState: { errors },
-  } = useForm<ColorDataProps>({
+  } = useForm<ColorFormValues>({
     resolver: yupResolver(schema),
   });
 
   const { enqueueSnackbar } = useSnackbar();
 
-  const addColor = useMutation<AxiosResponse, Error, ColorDataProps, unknown>(
+  const addColor = useMutation<AxiosResponse, Error, ColorFormValues, unknown>(
     (data) => api.post('/colors', data),
   );
 
   const updateColor = useMutation<
     AxiosResponse,
     Error,
-    ColorDataProps,
+    ColorFormValues,
     unknown
   >((data) => api.patch(`/colors/${colorId}`, data));
 
   useEffect(() => {
     if (colorId && isSuccess) {
-      setValue('name', data?.data?.result?.name);
-      setValue('description', data?.data?.result?.description);
+      reset(data?.data?.result);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [colorId, data]);
+  }, [colorId, data, reset, isSuccess]);
 
-  const onSubmit = (data: ColorDataProps) => {
+  const onSubmit = (data: ColorFormValues) => {
     colorId
       ? updateColor.mutate(data, {
           onSuccess: () => {
@@ -100,43 +85,47 @@ export const FormColor: FC<FormColorProps> = ({ pageTitle, colorId }) => {
         });
   };
 
-  if ((!isSuccess && !colorId) || (colorId && !isSuccess)) {
-    // Router.push('/404');
+  if (isError) {
+    Router.push('/404');
   }
 
   return (
-    <S.StyledCard>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader subheader="Insira a cor" title={pageTitle} />
+        <CardHeader title="Cores" subHeader={pageTitle} />
         <Divider />
-        <CardContent>
-          <Grid container spacing={4}>
-            <Grid item md={12} xs={12}>
-              <Controller
-                control={control}
-                render={({
-                  field: { onChange, onBlur, value },
-                  fieldState: { error },
-                }) => (
-                  <TextField
-                    error={!!error}
-                    fullWidth
-                    autoComplete="false"
-                    helperText={error?.message || 'Nome da cor'}
-                    label="Nome da cor"
-                    name="name"
-                    onBlur={onBlur}
-                    type="text"
-                    onChange={onChange}
-                    value={value ?? ''}
-                    variant="outlined"
-                  />
-                )}
-                name="name"
-              />
+        {colorId && !isSuccess ? (
+          <LoadingProgress />
+        ) : (
+          <CardContent>
+            <Grid container spacing={4}>
+              <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <TextField
+                      error={!!error}
+                      fullWidth
+                      autoComplete="false"
+                      helperText={error?.message}
+                      label="Nome da cor"
+                      name="name"
+                      onBlur={onBlur}
+                      type="text"
+                      onChange={onChange}
+                      value={value ?? ''}
+                      variant="outlined"
+                    />
+                  )}
+                  name="name"
+                />
+              </Grid>
             </Grid>
-          </Grid>
-        </CardContent>
+          </CardContent>
+        )}
         <Divider />
         <Box
           sx={{
@@ -158,6 +147,6 @@ export const FormColor: FC<FormColorProps> = ({ pageTitle, colorId }) => {
           </LoadingButton>
         </Box>
       </form>
-    </S.StyledCard>
+    </>
   );
 };

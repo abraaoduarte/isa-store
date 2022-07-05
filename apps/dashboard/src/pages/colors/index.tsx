@@ -1,20 +1,22 @@
-import { Paginated, Color } from 'interfaces/api';
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import { dehydrate, QueryClient } from 'react-query';
 import { api } from 'services/api';
 import Base from 'templates/Base';
 import ColorTemplate from 'templates/Color';
+import { ColorTemplateListProps } from 'templates/Color/Color.interface';
 
-type ColorProps = {
-  data: Paginated<Color>;
-};
-
-export default function Index(props: ColorProps) {
+export default function Index(props: ColorTemplateListProps) {
   return (
-    <Base>
-      <ColorTemplate data={props.data} />
-    </Base>
+    <>
+      <Head>
+        <title>Cores - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <ColorTemplate data={props.data} />
+      </Base>
+    </>
   );
 }
 
@@ -36,7 +38,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     'colors',
     () =>
       api
-        .get('colors', {
+        .get('colors/paginate', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

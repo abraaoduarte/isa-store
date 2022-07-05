@@ -1,13 +1,19 @@
 import { GetServerSideProps } from 'next';
+import Head from 'next/head';
 import { parseCookies } from 'nookies';
 import Base from 'templates/Base';
 import { FormProductCategory } from 'templates/ProductCategory';
 
 export default function Index() {
   return (
-    <Base>
-      <FormProductCategory pageTitle="Adicionar categoria" />
-    </Base>
+    <>
+      <Head>
+        <title>Inserir nova categoria - Isa Duarte Store</title>
+      </Head>
+      <Base>
+        <FormProductCategory pageTitle="Adicionar uma nova categoria" />
+      </Base>
+    </>
   );
 }
 
