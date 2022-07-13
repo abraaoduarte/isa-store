@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import {
   Box,
   CardContent,
@@ -14,6 +14,8 @@ import {
   Button,
   Paper,
   Stack,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
@@ -27,7 +29,8 @@ import Router from 'next/router';
 import { isEmpty, omit } from 'ramda';
 import yup from 'utils/yup';
 import { api } from 'services/api';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
+import slugify from 'slugify';
 import {
   ProductFormValues,
   FormProductTemplateProps,
@@ -36,24 +39,26 @@ import NumberFormatCustom from 'components/NumberField/NumberField';
 import CardHeader from 'components/CardHeader';
 import LoadingProgress from 'components/LoadingProgress';
 import { ProductVariation } from 'interfaces/api';
-import { formatNumberToMoney } from 'utils/formatNumberToMoney';
+import { DialogControlProps } from 'components/CustomDialog/CustomDialog.interface';
+import CustomDialog from 'components/CustomDialog';
 
 const schema = yup
   .object({
     name: yup.string().required('Nome Obrigatório'),
+    slug: yup.string().required('Slug Obrigatório'),
     brand: yup.string().required('Marca Obrigatório'),
-    discount: yup.string().required('Desconto Obrigatório'),
-    quantity: yup.string().required('Quantidade Obrigatório'),
     category: yup.string().required('Categoria Obrigatório'),
-    price: yup.string().required('Preço Obrigatório'),
     productVariation: yup.array().of(
       yup.object().shape({
         color: yup.string().required('Cor é Obrigatório'),
-        quantity: yup
+        sku: yup.string().required('Cod Obrigatório'),
+        price: yup.string().required('Preço Obrigatório'),
+        inventory_quantity: yup
           .number()
           .required('Quantidade é Obrigatório')
           .min(1, 'Quantidade deve ser maior que 0'),
         size: yup.string().required('Tamanho é Obrigatório'),
+        is_active: yup.bool().required('Status é obrigatório'),
       }),
     ),
   })
@@ -74,12 +79,19 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
       enabled: !!productId,
     },
   );
+  const [dialog, setDialog] = useState<DialogControlProps>({
+    isOpen: false,
+  });
 
   const handleAddFields = () => {
     append({
+      uuid: undefined,
       color: undefined,
       size: undefined,
-      quantity: undefined,
+      inventory_quantity: undefined,
+      price: undefined,
+      sku: undefined,
+      is_active: true,
     });
   };
 
@@ -88,7 +100,6 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
     handleSubmit,
     setValue,
     formState: { errors },
-    watch,
     reset,
   } = useForm<ProductFormValues>({
     resolver: yupResolver(schema),
@@ -98,30 +109,28 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
     name: 'productVariation',
     control,
   });
-  const watchProductVariation = watch('productVariation', []);
-
-  const totalQuantity = watchProductVariation.reduce((acc, value) => {
-    return acc + value.quantity;
-  }, 0);
-  setValue('quantity', totalQuantity);
 
   const { enqueueSnackbar } = useSnackbar();
 
   const addBrand = useMutation<
     AxiosResponse,
-    Error,
+    AxiosError<{ message: string }>,
     ProductFormValues,
     unknown
   >((data) => {
     const normalizeData = {
-      ...omit(['price', 'category', 'brand'], data),
-      price: String(data.price).replace('.', '').replace(',', ''),
+      ...omit(['category', 'brand'], data),
       product_category_id: data.category,
       brand_id: data.brand,
+      discountable: data.discountable,
       productVariation: data.productVariation.map((variation) => ({
-        ...omit(['size', 'color'], variation),
+        ...omit(['size', 'color', 'price', 'uuid'], variation),
+        price: String(variation.price).replace('.', '').replace(',', ''),
+        inventory_quantity: variation.inventory_quantity,
+        sku: variation.sku,
         size_id: variation.size,
         color_id: variation.color,
+        is_active: variation.is_active,
       })),
     };
 
@@ -130,21 +139,26 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
 
   const updateBrand = useMutation<
     AxiosResponse,
-    Error,
+    AxiosError<{ message: string }>,
     ProductFormValues,
     unknown
   >((data) => {
     const normalizeData = {
       ...omit(['price', 'category', 'brand'], data),
-      price: String(data.price).replace('.', '').replace(',', ''),
       product_category_id: data.category,
       brand_id: data.brand,
+      discountable: data.discountable || false,
       productVariation: data.productVariation.map((variation) => ({
-        ...omit(['size', 'color'], variation),
+        ...omit(['size', 'color', 'price', 'uuid'], variation),
+        price: String(variation.price).replace('.', '').replace(',', ''),
         size_id: variation.size,
+        sku: variation.sku,
+        is_active: variation.is_active,
+        inventory_quantity: variation.inventory_quantity,
         color_id: variation.color,
       })),
     };
+
     return api.patch(`/products/${productId}`, normalizeData);
   });
 
@@ -152,14 +166,19 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
     if (productId && isSuccess) {
       reset({
         ...data?.data?.result,
-        price: formatNumberToMoney(data?.data?.result.price).replace('.', ''),
         brand: data?.data?.result.brand_id,
         category: data?.data?.result.product_category_id,
+        discountable: data?.data?.result.discountable,
         productVariation: data?.data?.result?.productVariation.map(
           (variation: ProductVariation) => ({
-            quantity: variation.quantity,
+            id: variation.id,
+            uuid: variation.id,
+            inventory_quantity: variation.inventory_quantity,
+            is_active: variation.is_active,
             color: variation.color_id,
             size: variation.size_id,
+            sku: variation.sku,
+            price: variation.price,
           }),
         ),
       });
@@ -173,7 +192,7 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
             Router.push('/products');
           },
           onError: (error) => {
-            enqueueSnackbar(error.message, {
+            enqueueSnackbar(error.response?.data.message || error.message, {
               variant: 'error',
             });
           },
@@ -183,11 +202,58 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
             Router.push('/products');
           },
           onError: (error) => {
-            enqueueSnackbar(error.message, {
+            enqueueSnackbar(error.response?.data.message || error.message, {
               variant: 'error',
             });
           },
         });
+  };
+
+  const deleteProductVariation = useMutation<
+    AxiosResponse,
+    AxiosError<{ message: string }>,
+    string,
+    unknown
+  >((productVariationId) =>
+    api.delete(`/product-variations/${productVariationId}`),
+  );
+
+  const handleDelete = () => {
+    if (dialog.id) {
+      deleteProductVariation.mutate(dialog.id, {
+        onSuccess: () => {
+          remove(dialog.index);
+          enqueueSnackbar('Produto deletado com sucesso!', {
+            variant: 'success',
+          });
+        },
+        onError: (error) => {
+          enqueueSnackbar(error.message, {
+            variant: 'error',
+          });
+        },
+      });
+    }
+    setDialog({
+      id: undefined,
+      index: undefined,
+      isOpen: false,
+    });
+  };
+
+  const handleOpenCustomDialog = (id: string, index: number) => {
+    setDialog({
+      isOpen: true,
+      index,
+      id,
+    });
+  };
+
+  const handleCloseCustomDialog = () => {
+    setDialog({
+      isOpen: false,
+      id: undefined,
+    });
   };
 
   return (
@@ -200,7 +266,7 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
         ) : (
           <CardContent>
             <Grid container spacing={4}>
-              <Grid item md={12} xs={12}>
+              <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
                   render={({
@@ -216,7 +282,15 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                       name="name"
                       onBlur={onBlur}
                       type="text"
-                      onChange={onChange}
+                      onChange={(event) => {
+                        onChange(event.currentTarget.value);
+                        setValue(
+                          'slug',
+                          slugify(event.currentTarget.value, {
+                            lower: true,
+                          }),
+                        );
+                      }}
                       value={value ?? ''}
                       variant="outlined"
                     />
@@ -224,86 +298,7 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                   name="name"
                 />
               </Grid>
-              <Grid item md={5} xs={12}>
-                <Controller
-                  control={control}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <FormControl fullWidth>
-                      <InputLabel
-                        error={!!error}
-                        htmlFor="outlined-adornment-amount"
-                      >
-                        Preço
-                      </InputLabel>
-                      <OutlinedInput
-                        error={!!error}
-                        onBlur={onBlur}
-                        fullWidth
-                        autoComplete="false"
-                        id="outlined-adornment-amount"
-                        value={value}
-                        onChange={onChange}
-                        startAdornment={
-                          <InputAdornment position="start">R$</InputAdornment>
-                        }
-                        label="Preço"
-                        inputComponent={NumberFormatCustom as any}
-                      />
-
-                      <FormHelperText
-                        error={!!error}
-                        color={error?.message && 'error'}
-                      >
-                        {error?.message}
-                      </FormHelperText>
-                    </FormControl>
-                  )}
-                  name="price"
-                />
-              </Grid>
-              <Grid item md={5} xs={12}>
-                <Controller
-                  control={control}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <FormControl fullWidth>
-                      <InputLabel
-                        error={!!error}
-                        htmlFor="outlined-adornment-amount"
-                      >
-                        Desconto
-                      </InputLabel>
-                      <OutlinedInput
-                        error={!!error}
-                        onBlur={onBlur}
-                        fullWidth
-                        autoComplete="false"
-                        type="number"
-                        id="outlined-adornment-amount"
-                        value={value ?? ''}
-                        onChange={onChange}
-                        startAdornment={
-                          <InputAdornment position="start">%</InputAdornment>
-                        }
-                        label="Desconto"
-                      />
-                      <FormHelperText
-                        error={!!error}
-                        color={error?.message && 'error'}
-                      >
-                        {error?.message}
-                      </FormHelperText>
-                    </FormControl>
-                  )}
-                  name="discount"
-                />
-              </Grid>
-              <Grid item md={2} xs={12}>
+              <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
                   render={({
@@ -313,21 +308,29 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                     <TextField
                       error={!!error}
                       fullWidth
-                      disabled
                       autoComplete="false"
                       helperText={error?.message}
-                      label="Quantidade"
-                      name="quantity"
-                      onBlur={onBlur}
-                      type="number"
+                      label="Slug"
+                      name="slug"
+                      onBlur={(event) => {
+                        setValue(
+                          'slug',
+                          slugify(event.currentTarget.value, {
+                            lower: true,
+                          }),
+                        );
+                        onBlur();
+                      }}
+                      type="text"
                       onChange={onChange}
                       value={value ?? ''}
                       variant="outlined"
                     />
                   )}
-                  name="quantity"
+                  name="slug"
                 />
               </Grid>
+
               <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
@@ -389,6 +392,7 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                   name="category"
                 />
               </Grid>
+
               <Grid item md={12} xs={12}>
                 <Controller
                   control={control}
@@ -414,6 +418,37 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                 />
               </Grid>
               <Grid item md={12} xs={12}>
+                <Controller
+                  control={control}
+                  render={({
+                    field: { onChange, onBlur, value },
+                    fieldState: { error },
+                  }) => (
+                    <FormControl>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            value={value ?? false}
+                            checked={value ?? false}
+                            onChange={onChange}
+                            onBlur={onBlur}
+                          />
+                        }
+                        label="Aplica desconto?"
+                        labelPlacement="top"
+                      />
+                      <FormHelperText
+                        error={!!error}
+                        color={error?.message && 'error'}
+                      >
+                        {error?.message}
+                      </FormHelperText>
+                    </FormControl>
+                  )}
+                  name="discountable"
+                />
+              </Grid>
+              <Grid item md={12} xs={12}>
                 <Button
                   startIcon={<AddIcon />}
                   onClick={handleAddFields}
@@ -427,6 +462,11 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                     sx={{ padding: 3, marginBottom: 5 }}
                     key={field.id}
                   >
+                    <input
+                      type="hidden"
+                      value={field.id}
+                      name="productVariationId"
+                    />
                     <Grid container spacing={3}>
                       <Grid item md={4} xs={12}>
                         <Controller
@@ -498,13 +538,55 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                             field: { onChange, onBlur, value },
                             fieldState: { error },
                           }) => (
+                            <FormControl fullWidth>
+                              <InputLabel
+                                error={!!error}
+                                htmlFor="outlined-adornment-amount"
+                              >
+                                Preço
+                              </InputLabel>
+                              <OutlinedInput
+                                error={!!error}
+                                onBlur={onBlur}
+                                fullWidth
+                                autoComplete="false"
+                                id="outlined-adornment-amount"
+                                value={value}
+                                onChange={onChange}
+                                startAdornment={
+                                  <InputAdornment position="start">
+                                    R$
+                                  </InputAdornment>
+                                }
+                                label="Preço"
+                                inputComponent={NumberFormatCustom as any}
+                              />
+
+                              <FormHelperText
+                                error={!!error}
+                                color={error?.message && 'error'}
+                              >
+                                {error?.message}
+                              </FormHelperText>
+                            </FormControl>
+                          )}
+                          name={`productVariation.${index}.price`}
+                        />
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
                             <TextField
                               error={!!error}
                               fullWidth
                               autoComplete="false"
                               helperText={error?.message}
                               label="Quantidade"
-                              name={`productVariation.${index}.quantity`}
+                              name={`productVariation.${index}.inventory_quantity`}
                               onBlur={onBlur}
                               type="number"
                               onChange={onChange}
@@ -512,10 +594,64 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                               variant="outlined"
                             />
                           )}
-                          name={`productVariation.${index}.quantity`}
+                          name={`productVariation.${index}.inventory_quantity`}
                         />
                       </Grid>
-
+                      <Grid item md={6} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <TextField
+                              error={!!error}
+                              fullWidth
+                              autoComplete="false"
+                              helperText={error?.message}
+                              label="SKU (Código)"
+                              name={`productVariation.${index}.sku`}
+                              onBlur={onBlur}
+                              type="text"
+                              onChange={onChange}
+                              value={value ?? ''}
+                              variant="outlined"
+                            />
+                          )}
+                          name={`productVariation.${index}.sku`}
+                        />
+                      </Grid>
+                      <Grid item md={2} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <FormControl>
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    value={value}
+                                    checked={value}
+                                    onChange={onChange}
+                                    onBlur={onBlur}
+                                  />
+                                }
+                                label="Produto ativo?"
+                                labelPlacement="top"
+                              />
+                              <FormHelperText
+                                error={!!error}
+                                color={error?.message && 'error'}
+                              >
+                                {error?.message}
+                              </FormHelperText>
+                            </FormControl>
+                          )}
+                          name={`productVariation.${index}.is_active`}
+                        />
+                      </Grid>
                       <Grid item md={12} xs={12}>
                         <Stack
                           direction="row"
@@ -527,7 +663,11 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                             size="small"
                             color="error"
                             variant="contained"
-                            onClick={() => remove(index)}
+                            onClick={() => {
+                              field.uuid
+                                ? handleOpenCustomDialog(field.uuid, index)
+                                : remove(index);
+                            }}
                           >
                             <DeleteIcon />
                           </Button>
@@ -557,17 +697,30 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
         >
           <LoadingButton
             type="submit"
-            loading={addBrand.isLoading || updateBrand.isLoading}
+            loading={
+              addBrand.isLoading ||
+              updateBrand.isLoading ||
+              (!!productId && !isSuccess)
+            }
             loadingPosition="start"
             startIcon={<SaveIcon />}
             color="primary"
             variant="contained"
-            disabled={!isEmpty(errors)}
+            disabled={
+              !isEmpty(errors) || addBrand.isLoading || updateBrand.isLoading
+            }
           >
             {productId ? 'Atualizar' : 'Salvar'}
           </LoadingButton>
         </Box>
       </form>
+      <CustomDialog
+        title="Tem certeza que deseja deletar?"
+        message="Após deletado, esse dado não poderá ser recuperado"
+        open={dialog.isOpen}
+        onConfirm={handleDelete}
+        onClose={handleCloseCustomDialog}
+      />
     </>
   );
 };

@@ -124,7 +124,6 @@ const ProductTemplate: FC<ProductTemplateListProps> = ({ data }) => {
                       <TableRow>
                         <TableCell>Produto</TableCell>
                         <TableCell>Descrição</TableCell>
-                        <TableCell>Preço</TableCell>
                         <TableCell>Criado em</TableCell>
                         <TableCell>Ações</TableCell>
                       </TableRow>
@@ -139,9 +138,6 @@ const ProductTemplate: FC<ProductTemplateListProps> = ({ data }) => {
                         >
                           <TableCell>{product.name}</TableCell>
                           <TableCell>{product.description}</TableCell>
-                          <TableCell>
-                            {formatNumberToMoney(product.price)}
-                          </TableCell>
                           <TableCell>
                             {format(parseISO(product.created_at), 'dd/MM/yyyy')}
                           </TableCell>

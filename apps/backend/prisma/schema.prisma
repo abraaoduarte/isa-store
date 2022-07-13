@@ -75,12 +75,11 @@ model ProductCategory {
 model Product {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String
+  slug String @unique
   description String
   banner String
-  price Int
-  discount Decimal
-  quantity Int
   is_active Boolean
+  discountable Boolean
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String @db.Uuid
   brand Brand @relation(fields: [brand_id], references: [id], onDelete: Cascade)
@@ -96,7 +95,9 @@ model Product {
 
 model ProductVariation {
   id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  quantity Int
+  inventory_quantity Int
+  price Int
+  sku String
   is_active Boolean
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String @db.Uuid
@@ -109,7 +110,7 @@ model ProductVariation {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
-  productImage ProductImage?
+  productImage ProductImage[]
   @@map("product_variations")
 }
 

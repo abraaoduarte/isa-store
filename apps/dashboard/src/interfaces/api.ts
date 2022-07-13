@@ -42,7 +42,6 @@ export interface Product {
   id: string;
   name: string;
   description: string;
-  price: number;
   image: string;
   brand_id: string;
   product_category_id: string;
@@ -51,9 +50,13 @@ export interface Product {
 }
 
 export interface ProductVariation {
+  id: string;
   size_id: string;
   color_id: string;
-  quantity: number;
+  price: number;
+  inventory_quantity: number;
+  sku: string;
+  is_active: boolean;
 }
 
 export interface Paginated<T> {

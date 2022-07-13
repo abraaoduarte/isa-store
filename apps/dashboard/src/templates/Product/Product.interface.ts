@@ -15,16 +15,20 @@ export interface ProductTemplateListProps {
 
 export interface ProductFormValues {
   name: string;
+  slug: string;
   brand: string;
-  price: number;
-  discount: number;
+  discountable: boolean;
   quantity: number;
   category: string;
   description?: string;
   productVariation: {
-    quantity: number;
+    uuid?: string;
+    inventory_quantity: number;
+    sku: string;
+    price: number;
     size: string;
     color: string;
+    is_active: boolean;
   }[];
 }
 

@@ -10,5 +10,6 @@ export interface CustomDialogProps {
 
 export interface DialogControlProps {
   id?: string;
+  index?: number;
   isOpen: boolean;
 }
