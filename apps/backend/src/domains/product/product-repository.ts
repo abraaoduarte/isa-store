@@ -95,6 +95,14 @@ export const create = async ({ body }: Request, user: User): Promise<Product> =>
 };
 
 export const update = async ({ body }: Request, uuid: string, user: User): Promise<Product> => {
+  const productBySlug = await findBySlug(toLower(body.slug));
+
+  const emailBeingUsed = !isNil(productBySlug) && !isEmpty(productBySlug);
+
+  if (emailBeingUsed && productBySlug.id !== uuid) {
+    throw new BadRequest('This slug is already being used!');
+  }
+
   const result = await prisma.$transaction(async (prisma) => {
     const product = await prisma.product.update({
       data: {
@@ -158,10 +166,20 @@ export const destroy = async (uuid: string): Promise<Product> => {
     throw new Error('Product not found');
   }
 
-  await prisma.product.delete({
-    where: {
-      id: uuid
-    }
+  await prisma.$transaction(async (prisma) => {
+    const product = await prisma.product.delete({
+      where: {
+        id: uuid
+      }
+    });
+
+    await prisma.productVariation.deleteMany({
+      where: {
+        product_id: uuid
+      }
+    });
+
+    return product;
   });
 
   return product;
