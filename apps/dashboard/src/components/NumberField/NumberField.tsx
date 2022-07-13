@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import NumberFormat, { InputAttributes } from 'react-number-format';
+import { formatNumberToMoney } from 'utils/formatNumberToMoney';
 import { NumberFormatCustom } from './NumberField.interface';
 
 const NumberFormatCustom = forwardRef<
@@ -12,6 +13,9 @@ const NumberFormatCustom = forwardRef<
     <NumberFormat
       {...other}
       getInputRef={ref}
+      format={(number) => {
+        return formatNumberToMoney(Number(number));
+      }}
       onValueChange={(values) => {
         onChange({
           target: {
@@ -20,6 +24,7 @@ const NumberFormatCustom = forwardRef<
           },
         });
       }}
+      placeholder="0,00"
       decimalSeparator=","
       thousandSeparator="."
       isNumericString
