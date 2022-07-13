@@ -122,9 +122,9 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
       ...omit(['category', 'brand'], data),
       product_category_id: data.category,
       brand_id: data.brand,
-      discountable: data.discountable || false,
+      discountable: data.discountable,
       productVariation: data.productVariation.map((variation) => ({
-        ...omit(['size', 'color', 'price'], variation),
+        ...omit(['size', 'color', 'price', 'uuid'], variation),
         price: String(variation.price).replace('.', '').replace(',', ''),
         inventory_quantity: variation.inventory_quantity,
         sku: variation.sku,
@@ -147,8 +147,9 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
       ...omit(['price', 'category', 'brand'], data),
       product_category_id: data.category,
       brand_id: data.brand,
+      discountable: data.discountable || false,
       productVariation: data.productVariation.map((variation) => ({
-        ...omit(['size', 'color'], variation),
+        ...omit(['size', 'color', 'price', 'uuid'], variation),
         price: String(variation.price).replace('.', '').replace(',', ''),
         size_id: variation.size,
         sku: variation.sku,
@@ -167,6 +168,7 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
         ...data?.data?.result,
         brand: data?.data?.result.brand_id,
         category: data?.data?.result.product_category_id,
+        discountable: data?.data?.result.discountable,
         productVariation: data?.data?.result?.productVariation.map(
           (variation: ProductVariation) => ({
             id: variation.id,
@@ -424,10 +426,14 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                   }) => (
                     <FormControl>
                       <FormControlLabel
-                        value={value}
-                        onChange={onChange}
-                        onBlur={onBlur}
-                        control={<Checkbox />}
+                        control={
+                          <Checkbox
+                            value={value ?? false}
+                            checked={value ?? false}
+                            onChange={onChange}
+                            onBlur={onBlur}
+                          />
+                        }
                         label="Aplica desconto?"
                         labelPlacement="top"
                       />
@@ -624,11 +630,14 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
                           }) => (
                             <FormControl>
                               <FormControlLabel
-                                value={value}
-                                checked={value || field.is_active}
-                                onChange={onChange}
-                                onBlur={onBlur}
-                                control={<Checkbox />}
+                                control={
+                                  <Checkbox
+                                    value={value}
+                                    checked={value}
+                                    onChange={onChange}
+                                    onBlur={onBlur}
+                                  />
+                                }
                                 label="Produto ativo?"
                                 labelPlacement="top"
                               />
@@ -688,12 +697,18 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
         >
           <LoadingButton
             type="submit"
-            loading={addBrand.isLoading || updateBrand.isLoading}
+            loading={
+              addBrand.isLoading ||
+              updateBrand.isLoading ||
+              (!!productId && !isSuccess)
+            }
             loadingPosition="start"
             startIcon={<SaveIcon />}
             color="primary"
             variant="contained"
-            disabled={!isEmpty(errors)}
+            disabled={
+              !isEmpty(errors) || addBrand.isLoading || updateBrand.isLoading
+            }
           >
             {productId ? 'Atualizar' : 'Salvar'}
           </LoadingButton>
