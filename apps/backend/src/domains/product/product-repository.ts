@@ -1,4 +1,4 @@
-import { isEmpty, isNil } from 'ramda';
+import { isEmpty, isNil, toLower } from 'ramda';
 import { ParsedQs } from 'qs';
 import { Product, ProductVariation, User } from '@prisma/client';
 import { RepositoryList } from 'interfaces';
@@ -6,6 +6,13 @@ import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
 import pMap from 'p-map';
 import { Request } from 'koa';
+import { BadRequest } from 'app/error';
+
+export const findBySlug = async (slug: string): Promise<Product | null> => prisma.product.findFirst({
+  where: {
+    slug: slug
+  }
+});
 
 export const index = async (query: ParsedQs): Promise<RepositoryList<Product[]>> => {
   const { page, limit, currentPage } = pagination(query);
@@ -30,7 +37,11 @@ export const show = async (uuid: string): Promise<Product> => {
       id: uuid
     },
     include: {
-      productVariation: true
+      productVariation: {
+        where: {
+          deleted_at: null
+        }
+      }
     }
   });
 
@@ -42,15 +53,22 @@ export const show = async (uuid: string): Promise<Product> => {
 };
 
 export const create = async ({ body }: Request, user: User): Promise<Product> => {
+  const productBySlug = await findBySlug(toLower(body.slug));
+
+  const emailBeingUsed = !isNil(productBySlug) && !isEmpty(productBySlug);
+
+  if (emailBeingUsed) {
+    throw new BadRequest('This slug is already being used!');
+  }
+
   const result = await prisma.$transaction(async (prisma) => {
     const product = await prisma.product.create({
       data: {
         name: body.name,
+        slug: body.slug,
+        discountable: body.discountable,
         description: body.description,
-        price: Number(body.price),
         banner: 'body.banner',
-        discount: Number(body.discount),
-        quantity: Number(body.quantity),
         is_active: true,
         user_id: user.id,
         brand_id: body.brand_id,
@@ -60,12 +78,12 @@ export const create = async ({ body }: Request, user: User): Promise<Product> =>
 
     await pMap(body.productVariation, async (productVariation: ProductVariation) => {
       await prisma.productVariation.create({
-
         data: {
           ...productVariation,
           user_id: user.id,
           is_active: true,
-          product_id: product.id
+          product_id: product.id,
+          price: Number(productVariation.price)
         }
       });
     }, { concurrency: 2 });
@@ -82,10 +100,9 @@ export const update = async ({ body }: Request, uuid: string, user: User): Promi
       data: {
         name: body.name,
         description: body.description,
-        price: Number(body.price),
+        slug: body.slug,
+        discountable: body.discountable,
         banner: 'body.banner',
-        discount: Number(body.discount),
-        quantity: Number(body.quantity),
         is_active: true,
         user_id: user.id,
         brand_id: body.brand_id,
@@ -96,18 +113,33 @@ export const update = async ({ body }: Request, uuid: string, user: User): Promi
       }
     });
 
-    // REMOVE ALL and UPDATE
-    // await pMap(body.productVariation, async (productVariation: ProductVariation) => {
-    //   await prisma.productVariation.create({
+    await pMap(body.productVariation, async (productVariation: ProductVariation) => {
+      if (productVariation.id) {
+        await prisma.productVariation.update({
+          data: {
+            ...productVariation,
+            user_id: user.id,
+            is_active: productVariation.is_active,
+            product_id: product.id,
+            price: Number(productVariation.price)
+          },
+          where: {
+            id: productVariation.id
+          }
+        });
+        return;
+      }
 
-    //     data: {
-    //       ...productVariation,
-    //       user_id: user.id,
-    //       is_active: true,
-    //       product_id: product.id
-    //     }
-    //   });
-    // }, { concurrency: 2 });
+      await prisma.productVariation.create({
+        data: {
+          ...productVariation,
+          user_id: user.id,
+          is_active: true,
+          product_id: uuid,
+          price: Number(productVariation.price)
+        }
+      });
+    }, { concurrency: 2 });
 
     return product;
   });
