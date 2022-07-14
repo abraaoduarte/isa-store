@@ -55,9 +55,9 @@ export const show = async (uuid: string): Promise<Product> => {
 export const create = async ({ body }: Request, user: User): Promise<Product> => {
   const productBySlug = await findBySlug(toLower(body.slug));
 
-  const emailBeingUsed = !isNil(productBySlug) && !isEmpty(productBySlug);
+  const slugBeingUsed = !isNil(productBySlug) && !isEmpty(productBySlug);
 
-  if (emailBeingUsed) {
+  if (slugBeingUsed) {
     throw new BadRequest('This slug is already being used!');
   }
 
@@ -97,9 +97,9 @@ export const create = async ({ body }: Request, user: User): Promise<Product> =>
 export const update = async ({ body }: Request, uuid: string, user: User): Promise<Product> => {
   const productBySlug = await findBySlug(toLower(body.slug));
 
-  const emailBeingUsed = !isNil(productBySlug) && !isEmpty(productBySlug);
+  const slugBeingUsed = !isNil(productBySlug) && !isEmpty(productBySlug);
 
-  if (emailBeingUsed && productBySlug.id !== uuid) {
+  if (slugBeingUsed && productBySlug.id !== uuid) {
     throw new BadRequest('This slug is already being used!');
   }
 

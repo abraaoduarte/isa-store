@@ -16,6 +16,7 @@ model User {
   is_active Boolean? @default(false)
   product Product[]
   productVariation ProductVariation[]
+  ledger Ledger[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -125,3 +126,38 @@ model ProductImage {
   deleted_at DateTime?
   @@map("product_images")
 }
+
+model LedgerCategory {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name String
+  description String?
+  is_active Boolean
+  ledger Ledger[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+}
+
+enum TransactionType {
+  DEBIT
+  CREDIT
+}
+
+model Ledger {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  description String
+  is_paid Boolean
+  due_date DateTime @db.Date
+  transaction_type TransactionType
+  amount Int
+  note String?
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @db.Uuid
+  ledgerCategory LedgerCategory @relation(fields: [ledger_category_id], references: [id], onDelete: Cascade)
+  ledger_category_id String @db.Uuid
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("ledger")
+}
+
