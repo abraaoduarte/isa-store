@@ -14,6 +14,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import GridViewIcon from '@mui/icons-material/GridView';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import NavItem from 'components/NavItem/NavItem';
 
 type SidebarProps = {
@@ -86,13 +87,34 @@ const Sidebar: FC<SidebarProps> = (props) => {
           </Box>
           <NavItem title="Medidas" icon={<SquareFootIcon />} href="/sizes" />
           <NavItem
-            title="Categoria do produto"
+            title="Categorias"
             icon={<CategoryIcon />}
             href="/product-categories"
           />
           <NavItem title="Cores" icon={<ColorLensIcon />} href="/colors" />
           <NavItem title="Marcas" icon={<GridViewIcon />} href="/brands" />
           <NavItem title="Produtos" icon={<CheckroomIcon />} href="/products" />
+          <Divider sx={{ borderColor: '#2D3748' }} />
+          <Box
+            sx={{
+              px: 2,
+              py: 3,
+            }}
+          >
+            <Typography color="neutral.100" variant="subtitle2">
+              Contas
+            </Typography>
+          </Box>
+          <NavItem
+            title="Categorias"
+            icon={<CategoryIcon />}
+            href="/ledger-categories"
+          />
+          <NavItem
+            title="Despesas & Entradas"
+            icon={<AccountBalanceIcon />}
+            href="/ledger"
+          />
         </Box>
       </Box>
     </>

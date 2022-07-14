@@ -13,7 +13,17 @@ export const findByName = async (name: string): Promise<LedgerCategory | null> =
   }
 });
 
-export const index = async (query: ParsedQs): Promise<RepositoryList<LedgerCategory[]>> => {
+export const index = async (): Promise<LedgerCategory[]> => {
+  const results = await prisma.ledgerCategory.findMany({
+    where: {
+      deleted_at: null
+    }
+  });
+
+  return results;
+};
+
+export const paginate = async (query: ParsedQs): Promise<RepositoryList<LedgerCategory[]>> => {
   const { page, limit, currentPage } = pagination(query);
 
   const total = await prisma.ledgerCategory.count();

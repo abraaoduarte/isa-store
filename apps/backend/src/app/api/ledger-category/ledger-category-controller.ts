@@ -3,10 +3,19 @@ import * as ledgerCategoryRepository from 'domains/ledger-category/ledger-catego
 import { wrap } from 'utils/wrap';
 
 export const index = wrap((req: Context) =>
-  ledgerCategoryRepository.index(req.query).then((ledgerCategories) => ({
+  ledgerCategoryRepository.index().then((ledgerCategories) => ({
     body: {
       message: 'success',
       ...ledgerCategories
+    }
+  }))
+);
+
+export const paginate = wrap((req: Context) =>
+  ledgerCategoryRepository.paginate(req.query).then((ledgerCategory) => ({
+    body: {
+      message: 'success',
+      ...ledgerCategory
     }
   }))
 );
