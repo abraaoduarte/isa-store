@@ -65,3 +65,24 @@ export interface Paginated<T> {
   currentPage: number;
   result: Array<T>;
 }
+
+export interface LedgerCategory {
+  id: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Ledger {
+  id: string;
+  description: string;
+  transaction_type: 'DEBIT' | 'CREDIT';
+  note: string;
+  amount: number;
+  due_date: Date;
+  is_paid: boolean;
+  created_at: string;
+  updated_at: string;
+}

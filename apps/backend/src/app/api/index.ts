@@ -7,6 +7,8 @@ import colorRouter from './color/color-router';
 import productCategoryRouter from './product-category/product-category-router';
 import productRouter from './product/product-router';
 import productVariationRouter from './product-variation/product-variation-router';
+import ledgerCategoryRouter from './ledger-category/ledger-category-router';
+import ledgerRouter from './ledger/ledger-router';
 
 const router = new Router({
   prefix: '/api'
@@ -20,5 +22,7 @@ router.use(colorRouter.routes());
 router.use(productCategoryRouter.routes());
 router.use(productRouter.routes());
 router.use(productVariationRouter.routes());
+router.use(ledgerCategoryRouter.routes());
+router.use(ledgerRouter.routes());
 
 export default router;
