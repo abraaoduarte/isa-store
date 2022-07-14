@@ -1,4 +1,4 @@
-import { isEmpty, isNil, toLower } from 'ramda';
+import { isEmpty, isNil } from 'ramda';
 import { ParsedQs } from 'qs';
 import { LedgerCategory } from '@prisma/client';
 import { RepositoryList } from 'interfaces';
@@ -45,7 +45,7 @@ export const show = async (uuid: string): Promise<LedgerCategory> => {
 };
 
 export const create = async ({ body }: Request): Promise<LedgerCategory> => {
-  const ledgerCategoryByName = await findByName(toLower(body.name));
+  const ledgerCategoryByName = await findByName((body.name));
 
   const categoryBeingUsed = !isNil(ledgerCategoryByName) && !isEmpty(ledgerCategoryByName);
 
@@ -70,7 +70,7 @@ export const create = async ({ body }: Request): Promise<LedgerCategory> => {
 };
 
 export const update = async ({ body }: Request, uuid: string): Promise<LedgerCategory> => {
-  const ledgerCategoryByName = await findByName(toLower(body.name));
+  const ledgerCategoryByName = await findByName((body.name));
 
   const nameBeingUsed = !isNil(ledgerCategoryByName) && !isEmpty(ledgerCategoryByName);
 
