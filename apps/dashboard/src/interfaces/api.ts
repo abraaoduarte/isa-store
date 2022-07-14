@@ -74,3 +74,15 @@ export interface LedgerCategory {
   created_at: string;
   updated_at: string;
 }
+
+export interface Ledger {
+  id: string;
+  description: string;
+  transaction_type: 'DEBIT' | 'CREDIT';
+  note: string;
+  amount: number;
+  due_date: Date;
+  is_paid: boolean;
+  created_at: string;
+  updated_at: string;
+}

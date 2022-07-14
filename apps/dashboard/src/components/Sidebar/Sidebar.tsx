@@ -111,7 +111,7 @@ const Sidebar: FC<SidebarProps> = (props) => {
             href="/ledger-categories"
           />
           <NavItem
-            title="Despesas & Entradas"
+            title="Movimentações"
             icon={<AccountBalanceIcon />}
             href="/ledger"
           />

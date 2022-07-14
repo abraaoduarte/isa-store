@@ -6,7 +6,7 @@ export const index = wrap((req: Context) =>
   ledgerCategoryRepository.index().then((ledgerCategories) => ({
     body: {
       message: 'success',
-      ...ledgerCategories
+      result: ledgerCategories
     }
   }))
 );

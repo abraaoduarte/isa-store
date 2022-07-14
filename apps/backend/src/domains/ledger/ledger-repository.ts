@@ -44,7 +44,9 @@ export const create = async ({ body }: Request, user: User): Promise<Ledger> => 
     const ledger = prisma.ledger.create({
       data: {
         ...data,
-        amount: Number(data.amount)
+        amount: Number(data.amount),
+        due_date: new Date(data.due_date),
+        user_id: user.id
       }
     });
 
@@ -61,7 +63,7 @@ export const update = async ({ body }: Request, uuid: string, user: User): Promi
         description: body.description,
         amount: Number(body.amount),
         transaction_type: body.transaction_type,
-        due_date: body.due_date,
+        due_date: new Date(body.due_date),
         is_paid: body.is_paid,
         user_id: user.id
       },

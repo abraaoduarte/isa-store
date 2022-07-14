@@ -1297,6 +1297,7 @@ __metadata:
     "@typescript-eslint/parser": ^5.18.0
     "@vscode/sqlite3": ^5.0.8
     bcrypt: ^5.0.1
+    date-fns-tz: ^1.3.6
     dotenv-safe: ^8.2.0
     eslint: ^7.12.1
     eslint-config-standard: ^16.0.3
@@ -2035,6 +2036,15 @@ __metadata:
   version: 7.0.0
   resolution: "dargs@npm:7.0.0"
   checksum: b8f1e3cba59c42e1f13a114ad4848c3fc1cf7470f633ee9e9f1043762429bc97d91ae31b826fb135eefde203a3fdb20deb0c0a0222ac29d937b8046085d668d1
+  languageName: node
+  linkType: hard
+
+"date-fns-tz@npm:^1.3.6":
+  version: 1.3.6
+  resolution: "date-fns-tz@npm:1.3.6"
+  peerDependencies:
+    date-fns: ">=2.0.0"
+  checksum: b706097dea9b5fbf15011aab781a6733eeb7c593a6e8dc07e5b8e2c3c1cdf243754ec321431de72cec1b9c7e4adfa03fb612ca2a3fcaafe0788ffdff76cf773f
   languageName: node
   linkType: hard
 
