@@ -9,6 +9,7 @@ import productRouter from './product/product-router';
 import productVariationRouter from './product-variation/product-variation-router';
 import ledgerCategoryRouter from './ledger-category/ledger-category-router';
 import ledgerRouter from './ledger/ledger-router';
+import sellOrderRouter from './sell-order/sell-order-router';
 
 const router = new Router({
   prefix: '/api'
@@ -24,5 +25,6 @@ router.use(productRouter.routes());
 router.use(productVariationRouter.routes());
 router.use(ledgerCategoryRouter.routes());
 router.use(ledgerRouter.routes());
+router.use(sellOrderRouter.routes());
 
 export default router;

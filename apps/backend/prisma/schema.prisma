@@ -17,6 +17,7 @@ model User {
   product Product[]
   productVariation ProductVariation[]
   ledger Ledger[]
+  sellOrder SellOrder[]
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -112,6 +113,7 @@ model ProductVariation {
   updated_at DateTime @updatedAt
   deleted_at DateTime?
   productImage ProductImage[]
+  sellOrderItem SellOrderItem[]
   @@map("product_variations")
 }
 
@@ -161,3 +163,25 @@ model Ledger {
   @@map("ledger")
 }
 
+model SellOrder {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  note String?
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @db.Uuid
+  total_price Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("sell_order")
+}
+
+model SellOrderItem {
+  id String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  productVariation ProductVariation @relation(fields: [product_variation_id], references: [id], onDelete: Cascade)
+  product_variation_id String @db.Uuid
+  quantity Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  deleted_at DateTime?
+  @@map("sell_order_items")
+}
