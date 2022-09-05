@@ -15,6 +15,7 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 import GridViewIcon from '@mui/icons-material/GridView';
 import CheckroomIcon from '@mui/icons-material/Checkroom';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import SellIcon from '@mui/icons-material/Sell';
 import NavItem from 'components/NavItem/NavItem';
 
 type SidebarProps = {
@@ -115,6 +116,18 @@ const Sidebar: FC<SidebarProps> = (props) => {
             icon={<AccountBalanceIcon />}
             href="/ledger"
           />
+          <Divider sx={{ borderColor: '#2D3748' }} />
+          <Box
+            sx={{
+              px: 2,
+              py: 3,
+            }}
+          >
+            <Typography color="neutral.100" variant="subtitle2">
+              Vendas
+            </Typography>
+            <NavItem title="Vendas" icon={<SellIcon />} href="/sell-orders" />
+          </Box>
         </Box>
       </Box>
     </>
