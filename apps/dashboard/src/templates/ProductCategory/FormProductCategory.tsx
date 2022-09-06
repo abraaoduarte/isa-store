@@ -20,7 +20,7 @@ import CardHeader from 'components/CardHeader';
 
 const schema = yup
   .object({
-    name: yup.string().required('Tamanho Obrigatório'),
+    name: yup.string().required('Categoria Obrigatória'),
   })
   .required();
 
@@ -117,7 +117,7 @@ export const FormProductCategory: FC<FormProductCategoryTemplateProps> = ({
                       fullWidth
                       autoComplete="false"
                       helperText={error?.message || 'Nome da categoria'}
-                      label="Cateogria"
+                      label="Categoria"
                       name="name"
                       onBlur={onBlur}
                       type="text"

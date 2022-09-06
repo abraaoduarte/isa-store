@@ -122,7 +122,7 @@ export const FormProduct: FC<FormProductTemplateProps> = ({
       ...omit(['category', 'brand'], data),
       product_category_id: data.category,
       brand_id: data.brand,
-      discountable: data.discountable,
+      discountable: data.discountable || false,
       productVariation: data.productVariation.map((variation) => ({
         ...omit(['size', 'color', 'price', 'uuid'], variation),
         price: String(variation.price).replace('.', '').replace(',', ''),

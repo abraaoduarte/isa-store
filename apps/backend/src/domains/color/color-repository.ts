@@ -5,6 +5,7 @@ import { RepositoryList } from 'interfaces';
 import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
 import { Request } from 'koa';
+import { BadRequest } from 'app/error';
 
 export const index = async (): Promise<Color[]> => {
   const results = await prisma.color.findMany({
@@ -51,6 +52,18 @@ export const create = async ({ body }: Request): Promise<Color> => {
   const result = await prisma.$transaction(async (prisma) => {
     const data = body as Color;
 
+    const findColor = await prisma.color.findFirst({
+      where: {
+        name: data.name
+      }
+    });
+
+    const colorBeingUsed = !isNil(findColor) && !isEmpty(findColor);
+
+    if (colorBeingUsed) {
+      throw new BadRequest('This color is already being used!');
+    }
+
     const color = prisma.color.create({
       data: {
         ...data
@@ -65,6 +78,18 @@ export const create = async ({ body }: Request): Promise<Color> => {
 
 export const update = async ({ body }: Request, uuid: string): Promise<Color> => {
   const result = await prisma.$transaction(async (prisma) => {
+    const findColor = await prisma.color.findFirst({
+      where: {
+        name: body.name
+      }
+    });
+
+    const colorBeingUsed = !isNil(findColor) && !isEmpty(findColor);
+
+    if (colorBeingUsed && findColor.id !== uuid) {
+      throw new BadRequest('This color is already being used!');
+    }
+
     const color = prisma.color.update({
       data: {
         name: body.name

@@ -17,7 +17,7 @@ import CardHeader from 'components/CardHeader';
 
 const schema = yup
   .object({
-    name: yup.string().required('Tamanho Obrigatório'),
+    name: yup.string().required('Nome Obrigatório'),
   })
   .required();
 

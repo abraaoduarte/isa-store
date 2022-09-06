@@ -5,6 +5,7 @@ import { RepositoryList } from 'interfaces';
 import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
 import { Request } from 'koa';
+import { BadRequest } from 'app/error';
 
 export const index = async (): Promise<Brand[]> => {
   const brands = await prisma.brand.findMany({
@@ -51,6 +52,18 @@ export const create = async ({ body }: Request): Promise<Brand> => {
   const result = await prisma.$transaction(async (prisma) => {
     const data = body as Brand;
 
+    const findBrand = await prisma.brand.findFirst({
+      where: {
+        name: data.name
+      }
+    });
+
+    const brandBeingUsed = !isNil(findBrand) && !isEmpty(findBrand);
+
+    if (brandBeingUsed) {
+      throw new BadRequest('This brand is already being used!');
+    }
+
     const brand = prisma.brand.create({
       data: {
         ...data
@@ -65,6 +78,18 @@ export const create = async ({ body }: Request): Promise<Brand> => {
 
 export const update = async ({ body }: Request, uuid: string): Promise<Brand> => {
   const result = await prisma.$transaction(async (prisma) => {
+    const findBrand = await prisma.brand.findFirst({
+      where: {
+        name: body.name
+      }
+    });
+
+    const brandBeingUsed = !isNil(findBrand) && !isEmpty(findBrand);
+
+    if (brandBeingUsed && findBrand.id !== uuid) {
+      throw new BadRequest('This brand is already being used!');
+    }
+
     const brand = prisma.brand.update({
       data: {
         name: body.name,

@@ -5,6 +5,7 @@ import { RepositoryList } from 'interfaces';
 import pagination from 'utils/pagination';
 import prisma from 'prisma/prisma';
 import { Request } from 'koa';
+import { BadRequest } from 'app/error';
 
 export const index = async (): Promise<ProductCategory[]> => {
   const results = await prisma.productCategory.findMany({
@@ -51,6 +52,18 @@ export const create = async ({ body }: Request): Promise<ProductCategory> => {
   const result = await prisma.$transaction(async (prisma) => {
     const data = body as ProductCategory;
 
+    const findCategory = await prisma.productCategory.findFirst({
+      where: {
+        name: data.name
+      }
+    });
+
+    const categoryBeingUsed = !isNil(findCategory) && !isEmpty(findCategory);
+
+    if (categoryBeingUsed) {
+      throw new BadRequest('This category is already being used!');
+    }
+
     const productCategory = prisma.productCategory.create({
       data: {
         ...data
@@ -65,6 +78,18 @@ export const create = async ({ body }: Request): Promise<ProductCategory> => {
 
 export const update = async ({ body }: Request, uuid: string): Promise<ProductCategory> => {
   const result = await prisma.$transaction(async (prisma) => {
+    const findCategory = await prisma.productCategory.findFirst({
+      where: {
+        name: body.name
+      }
+    });
+
+    const categoryBeingUsed = !isNil(findCategory) && !isEmpty(findCategory);
+
+    if (categoryBeingUsed && findCategory.id !== uuid) {
+      throw new BadRequest('This category is already being used!');
+    }
+
     const productCategory = prisma.productCategory.update({
       data: {
         name: body.name,
