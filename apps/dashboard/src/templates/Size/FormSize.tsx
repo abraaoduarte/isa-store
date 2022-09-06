@@ -132,7 +132,7 @@ export const FormSize: FC<FormSizeTemplateProps> = ({ pageTitle, sizeId }) => {
                     fieldState: { error },
                   }) => (
                     <>
-                      <FormControl fullWidth>
+                      <FormControl fullWidth error={!!error}>
                         <InputLabel id="demo-simple-select-helper-label">
                           Selecione o tipo de medida
                         </InputLabel>
