@@ -78,6 +78,18 @@ export const create = async ({ body }: Request): Promise<Size> => {
 
 export const update = async ({ body }: Request, uuid: string): Promise<Size> => {
   return await prisma.$transaction(async (prisma) => {
+    const findSize = await prisma.size.findFirst({
+      where: {
+        size: body.size
+      }
+    });
+
+    const sizeBeingUsed = !isNil(findSize) && !isEmpty(findSize);
+
+    if (sizeBeingUsed && findSize.id !== uuid) {
+      throw new BadRequest('This size is already being used!');
+    }
+
     await prisma.size.update({
       data: {
         size: body.size,
