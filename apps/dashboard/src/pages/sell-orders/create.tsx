@@ -34,11 +34,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const queryClient = new QueryClient();
 
-  const sellOrders = await queryClient.fetchQuery(
-    'sellOrders',
+  const products = await queryClient.fetchQuery(
+    'products',
     () =>
       api
-        .get('sell-orders', {
+        .get('product-variations', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -51,7 +51,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   return {
     props: {
-      categories: sellOrders.result,
+      products: products.result,
     },
   };
 };

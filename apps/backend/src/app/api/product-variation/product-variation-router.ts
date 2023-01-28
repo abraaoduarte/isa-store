@@ -8,6 +8,7 @@ const router = new Router({
 })
   .use(locker.api());
 
+router.get('/', controller.index);
 router.delete('/:uuid', validate.params(makeUuidSchema('uuid')), controller.destroy);
 
 export default router;

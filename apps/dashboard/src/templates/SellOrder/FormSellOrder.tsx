@@ -11,13 +11,14 @@ import {
   OutlinedInput,
   FormHelperText,
   MenuItem,
-  FormControlLabel,
-  Checkbox,
+  Button,
+  Paper,
+  Stack,
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import { useSnackbar } from 'notistack';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useMutation, useQuery } from 'react-query';
@@ -37,20 +38,30 @@ import CardHeader from 'components/CardHeader';
 import LoadingProgress from 'components/LoadingProgress';
 import { parse } from 'date-fns';
 import { format, utcToZonedTime } from 'date-fns-tz';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const schema = yup
   .object({
-    description: yup.string().required('Descrição Obrigatório'),
-    category: yup.string().required('Categoria Obrigatório'),
-    amount: yup.string().required('Valor Obrigatório'),
+    total_price: yup.string().required('Preço Obrigatório'),
     due_date: yup.string().required('Data Obrigatório'),
+    sellOrderItems: yup.array().of(
+      yup.object().shape({
+        product_variation_id: yup.string().required('Produto é Obrigatório'),
+        total_price: yup.string().required('Preço Obrigatório'),
+        quantity: yup
+          .number()
+          .required('Quantidade é Obrigatório')
+          .min(1, 'Quantidade deve ser maior que 0'),
+      }),
+    ),
   })
   .required();
 
 export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
   pageTitle,
   sellOrderId,
-  categories,
+  products,
 }) => {
   const { data, isSuccess } = useQuery(
     ['sellOrder', sellOrderId],
@@ -60,6 +71,18 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
     },
   );
 
+  const handleAddFields = () => {
+    append({
+      uuid: undefined,
+      color: undefined,
+      size: undefined,
+      inventory_quantity: undefined,
+      price: undefined,
+      sku: undefined,
+      is_active: true,
+    });
+  };
+
   const {
     control,
     handleSubmit,
@@ -68,6 +91,11 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
     reset,
   } = useForm<SellOrderFormValues>({
     resolver: yupResolver(schema),
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    name: 'sellOrderItems',
+    control,
   });
 
   const { enqueueSnackbar } = useSnackbar();
@@ -84,6 +112,15 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
       amount: String(data.amount).replace('.', '').replace(',', ''),
       is_paid: data.is_paid,
       due_date: format(new Date(data.due_date), 'MM/dd/yyyy'),
+      sellOrderItems: data.sellOrderItems.map((variation) => ({
+        ...omit(['size', 'color', 'price', 'uuid'], variation),
+        price: String(variation.price).replace('.', '').replace(',', ''),
+        inventory_quantity: variation.inventory_quantity,
+        sku: variation.sku,
+        size_id: variation.size,
+        color_id: variation.color,
+        is_active: variation.is_active,
+      })),
     };
 
     return api.post('/sell-orders', normalizeData);
@@ -101,6 +138,18 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
       amount: String(data.amount).replace('.', '').replace(',', ''),
       is_paid: data.is_paid,
       due_date: format(new Date(data.due_date), 'MM/dd/yyyy'),
+      sellOrderItems: data?.data?.result?.sellOrderItems.map(
+        (variation: ProductVariation) => ({
+          id: variation.id,
+          uuid: variation.id,
+          inventory_quantity: variation.inventory_quantity,
+          is_active: variation.is_active,
+          color: variation.color_id,
+          size: variation.size_id,
+          sku: variation.sku,
+          price: variation.price,
+        }),
+      ),
     };
 
     return api.patch(`/sell-orders/${sellOrderId}`, normalizeData);
@@ -149,101 +198,13 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardHeader title="Movimentações" subHeader={pageTitle} />
+        <CardHeader title="Vendas" subHeader={pageTitle} />
         <Divider />
         {sellOrderId && !isSuccess ? (
           <LoadingProgress />
         ) : (
           <CardContent>
             <Grid container spacing={4}>
-              <Grid item md={4} xs={12}>
-                <Controller
-                  control={control}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      error={!!error}
-                      select
-                      fullWidth
-                      autoComplete="false"
-                      helperText={error?.message}
-                      label="Tipo de movimentação"
-                      name="transaction_type"
-                      onBlur={onBlur}
-                      type="text"
-                      onChange={onChange}
-                      value={value ?? ''}
-                      variant="outlined"
-                    >
-                      <MenuItem key="credit" value="CREDIT">
-                        Crédito
-                      </MenuItem>
-                      <MenuItem key="debit" value="DEBIT">
-                        Débito
-                      </MenuItem>
-                      )
-                    </TextField>
-                  )}
-                  name="transaction_type"
-                />
-              </Grid>
-              <Grid item md={4} xs={12}>
-                <Controller
-                  control={control}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      error={!!error}
-                      fullWidth
-                      autoComplete="false"
-                      helperText={error?.message}
-                      label="Descrição"
-                      name="description"
-                      onBlur={onBlur}
-                      type="text"
-                      onChange={onChange}
-                      value={value ?? ''}
-                      variant="outlined"
-                    />
-                  )}
-                  name="description"
-                />
-              </Grid>
-              <Grid item md={4} xs={12}>
-                <Controller
-                  control={control}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <TextField
-                      error={!!error}
-                      select
-                      fullWidth
-                      autoComplete="false"
-                      helperText={error?.message}
-                      label="Categoria"
-                      name="category"
-                      onBlur={onBlur}
-                      type="text"
-                      onChange={onChange}
-                      value={value ?? ''}
-                      variant="outlined"
-                    >
-                      {categories.map((category) => (
-                        <MenuItem key={category.id} value={category.id}>
-                          {category.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-                  name="category"
-                />
-              </Grid>
               <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
@@ -251,15 +212,17 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
                     field: { onChange, onBlur, value },
                     fieldState: { error },
                   }) => (
-                    <FormControl fullWidth>
+                    <FormControl fullWidth disabled>
                       <InputLabel
+                        disabled
                         error={!!error}
                         htmlFor="outlined-adornment-amount"
                       >
-                        Valor
+                        Valor total
                       </InputLabel>
                       <OutlinedInput
                         error={!!error}
+                        disabled
                         onBlur={onBlur}
                         fullWidth
                         autoComplete="false"
@@ -269,7 +232,7 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
                         startAdornment={
                           <InputAdornment position="start">R$</InputAdornment>
                         }
-                        label="Valor"
+                        label="Valor total"
                         inputComponent={NumberFormatCustom as any}
                       />
 
@@ -284,7 +247,7 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
                   name="amount"
                 />
               </Grid>
-              <Grid item md={4} xs={12}>
+              <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
                   render={({
@@ -319,37 +282,6 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
                   name="due_date"
                 />
               </Grid>
-              <Grid item md={2} xs={12}>
-                <Controller
-                  control={control}
-                  render={({
-                    field: { onChange, onBlur, value },
-                    fieldState: { error },
-                  }) => (
-                    <FormControl fullWidth>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            value={value ?? false}
-                            checked={value ?? false}
-                            onChange={onChange}
-                            onBlur={onBlur}
-                          />
-                        }
-                        label="Consolidada"
-                        labelPlacement="start"
-                      />
-                      <FormHelperText
-                        error={!!error}
-                        color={error?.message && 'error'}
-                      >
-                        {error?.message}
-                      </FormHelperText>
-                    </FormControl>
-                  )}
-                  name="is_paid"
-                />
-              </Grid>
               <Grid item md={12} xs={12}>
                 <Controller
                   control={control}
@@ -373,6 +305,156 @@ export const FormSellOrder: FC<FormSellOrderTemplateProps> = ({
                   )}
                   name="note"
                 />
+              </Grid>
+              <Grid item md={12} xs={12}>
+                <Button
+                  startIcon={<AddIcon />}
+                  onClick={handleAddFields}
+                  sx={{ marginBottom: 2 }}
+                >
+                  Adicionar
+                </Button>
+                {fields.map((field, index) => (
+                  <Paper
+                    elevation={6}
+                    sx={{ padding: 3, marginBottom: 5 }}
+                    key={field.id}
+                  >
+                    <input
+                      type="hidden"
+                      value={field.id}
+                      name="productVariationId"
+                    />
+                    <Grid container spacing={3}>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          key={field.id}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <TextField
+                              error={!!error}
+                              select
+                              fullWidth
+                              autoComplete="false"
+                              helperText={error?.message}
+                              label="Tamanho"
+                              name={`productVariation.${index}.size`}
+                              onBlur={onBlur}
+                              type="text"
+                              onChange={onChange}
+                              value={value ?? ''}
+                              variant="outlined"
+                            >
+                              {products.map((size) => (
+                                <MenuItem key={size.id} value={size.id}>
+                                  {size.size}
+                                </MenuItem>
+                              ))}
+                            </TextField>
+                          )}
+                          name={`productVariation.${index}.size`}
+                        />
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <FormControl fullWidth>
+                              <InputLabel
+                                error={!!error}
+                                htmlFor="outlined-adornment-amount"
+                              >
+                                Preço
+                              </InputLabel>
+                              <OutlinedInput
+                                error={!!error}
+                                onBlur={onBlur}
+                                fullWidth
+                                autoComplete="false"
+                                id="outlined-adornment-amount"
+                                value={value}
+                                onChange={onChange}
+                                startAdornment={
+                                  <InputAdornment position="start">
+                                    R$
+                                  </InputAdornment>
+                                }
+                                label="Preço"
+                                inputComponent={NumberFormatCustom as any}
+                              />
+
+                              <FormHelperText
+                                error={!!error}
+                                color={error?.message && 'error'}
+                              >
+                                {error?.message}
+                              </FormHelperText>
+                            </FormControl>
+                          )}
+                          name={`productVariation.${index}.price`}
+                        />
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Controller
+                          control={control}
+                          render={({
+                            field: { onChange, onBlur, value },
+                            fieldState: { error },
+                          }) => (
+                            <TextField
+                              error={!!error}
+                              fullWidth
+                              autoComplete="false"
+                              helperText={error?.message}
+                              label="Quantidade"
+                              name={`productVariation.${index}.inventory_quantity`}
+                              onBlur={onBlur}
+                              type="number"
+                              onChange={onChange}
+                              value={value ?? ''}
+                              variant="outlined"
+                            />
+                          )}
+                          name={`productVariation.${index}.inventory_quantity`}
+                        />
+                      </Grid>
+                      <Grid item md={12} xs={12}>
+                        <Stack
+                          direction="row"
+                          justifyContent="flex-end"
+                          alignItems="center"
+                          spacing={1}
+                        >
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="contained"
+                            onClick={() => {
+                              field.uuid
+                                ? handleOpenCustomDialog(field.uuid, index)
+                                : remove(index);
+                            }}
+                          >
+                            <DeleteIcon />
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={handleAddFields}
+                          >
+                            <AddIcon />
+                          </Button>
+                        </Stack>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                ))}
               </Grid>
             </Grid>
           </CardContent>

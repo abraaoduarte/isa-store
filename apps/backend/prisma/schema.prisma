@@ -168,7 +168,8 @@ model SellOrder {
   note String?
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id String @db.Uuid
-  total_price Int
+  total Int
+  due_date DateTime @db.Date
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?
@@ -180,6 +181,7 @@ model SellOrderItem {
   productVariation ProductVariation @relation(fields: [product_variation_id], references: [id], onDelete: Cascade)
   product_variation_id String @db.Uuid
   quantity Int
+  total Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   deleted_at DateTime?

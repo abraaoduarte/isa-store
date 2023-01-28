@@ -1,4 +1,4 @@
-import { Paginated, SellOrder, SellOderCategory } from 'interfaces/api';
+import { Paginated, SellOrder, ProductVariation } from 'interfaces/api';
 
 export type PaginatedSellOder = Paginated<SellOrder>;
 
@@ -19,5 +19,5 @@ export interface SellOrderFormValues {
 export interface FormSellOrderTemplateProps {
   pageTitle: string;
   sellOrderId?: string;
-  categories: Array<SellOrderCategory>;
+  products: Array<ProductVariation>;
 }

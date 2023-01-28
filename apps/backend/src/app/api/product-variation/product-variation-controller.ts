@@ -10,3 +10,12 @@ export const destroy = wrap((req: Context) =>
     }
   }))
 );
+
+export const index = wrap((req: Context) =>
+  productVariationRepository.index().then((productVariation) => ({
+    body: {
+      message: 'success',
+      result: productVariation
+    }
+  }))
+);
